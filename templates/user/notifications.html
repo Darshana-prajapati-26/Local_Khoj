@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Notifications — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:720px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Account</p>
+            <h4 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Notifications</h4>
+        </div>
+        {% if notifications %}
+        <button id="markAllBtn" class="btn btn-sm"
+            style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:9px;">
+            <i class="bi bi-check2-all me-1"></i>Mark all read
+        </button>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+    <div class="d-flex flex-column gap-2" id="notifList">
+        {% for n in notifications %}
+        {% with obj=n.obj url=n.url %}
+        <div class="notif-item card p-0 overflow-hidden {% if not obj.is_read %}notif-unread{% endif %}"
+            id="notif-{{ obj.id }}"
+            style="border:1px solid {% if not obj.is_read %}rgba(0,210,255,.2){% else %}var(--lk-card-border){% endif %};transition:all .2s;{% if url %}cursor:pointer;{% endif %}"
+            {% if url %}onclick="window.location.href='{{ url }}'"{% endif %}>
+            <div class="d-flex align-items-start gap-3 p-3">
+
+                <!-- Icon -->
+                <div style="width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+                    {% if obj.notification_type == 'payment' %}background:rgba(56,239,125,.12);
+                    {% elif obj.notification_type == 'review' %}background:rgba(255,210,0,.12);
+                    {% elif obj.notification_type == 'message' %}background:rgba(0,210,255,.12);
+                    {% elif obj.notification_type == 'offer' or obj.notification_type == 'promotion' %}background:rgba(255,65,108,.12);
+                    {% else %}background:rgba(58,123,213,.12);{% endif %}">
+                    <i class="bi
+                        {% if obj.notification_type == 'payment' %}bi-credit-card-fill" style="color:#38ef7d;
+                        {% elif obj.notification_type == 'review' %}bi-star-fill" style="color:#ffd200;
+                        {% elif obj.notification_type == 'lead' %}bi-person-lines-fill" style="color:#00d2ff;
+                        {% elif obj.notification_type == 'message' %}bi-chat-dots-fill" style="color:#00d2ff;
+                        {% elif obj.notification_type == 'offer' or obj.notification_type == 'promotion' %}bi-tag-fill" style="color:#ff6b8a;
+                        {% elif obj.notification_type == 'store_update' %}bi-shop-window" style="color:#3a7bd5;
+                        {% else %}bi-bell-fill" style="color:#3a7bd5;{% endif %}
+                        font-size:.95rem;"></i>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-grow-1 min-width-0">
+                    <div class="d-flex align-items-start justify-content-between gap-2">
+                        <div class="fw-semibold" style="color:var(--lk-body-fg);font-size:.9rem;">
+                            {{ obj.title }}
+                            {% if not obj.is_read %}
+                            <span class="badge ms-1" style="background:rgba(0,210,255,.15);color:#00d2ff;font-size:.65rem;border-radius:20px;padding:2px 7px;">New</span>
+                            {% endif %}
+                        </div>
+                        <span class="small flex-shrink-0" style="color:var(--lk-muted);font-size:.72rem;">{{ obj.created_at|timesince }} ago</span>
+                    </div>
+                    {% if obj.body %}
+                    <p class="small mb-0 mt-1" style="color:var(--lk-muted);line-height:1.5;">{{ obj.body }}</p>
+                    {% endif %}
+                    {% if url %}
+                    <div class="small mt-1 d-flex align-items-center gap-1" style="color:#00d2ff;font-size:.75rem;">
+                        <i class="bi bi-arrow-right-circle"></i>
+                        {% if obj.notification_type == 'message' %}Open Chat
+                        {% elif obj.notification_type == 'review' %}View Review
+                        {% elif obj.notification_type == 'lead' %}View Lead
+                        {% elif obj.notification_type == 'payment' %}View Order
+                        {% else %}Open{% endif %}
+                    </div>
+                    {% endif %}
+                    {% if obj.related_store %}
+                    <div class="small mt-1" style="color:var(--lk-muted);font-size:.72rem;">
+                        <i class="bi bi-shop me-1" style="color:#00d2ff;"></i>{{ obj.related_store.name }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Delete -->
+                <button class="btn btn-sm flex-shrink-0 delete-notif-btn" data-id="{{ obj.id }}"
+                    style="width:30px;height:30px;padding:0;background:rgba(255,65,108,.08);border:1px solid rgba(255,65,108,.15);color:#ff6b8a;border-radius:8px;opacity:.6;transition:opacity .2s;"
+                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.6'"
+                    title="Delete">
+                    <i class="bi bi-x" style="font-size:.9rem;"></i>
+                </button>
+            </div>
+
+            {% if not obj.is_read %}
+            <div style="height:2px;background:linear-gradient(90deg,#00d2ff,#3a7bd5);"></div>
+            {% endif %}
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="width:72px;height:72px;border-radius:20px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+            <i class="bi bi-bell-slash" style="font-size:1.8rem;color:#00d2ff;"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">All caught up!</h5>
+        <p style="color:var(--lk-muted);">You have no notifications right now.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary mt-2 px-5">
+            <i class="bi bi-house me-2"></i>Go Home
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function getCsrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+
+// Delete single notification
+document.querySelectorAll('.delete-notif-btn').forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        const id = this.getAttribute('data-id');
+        const item = document.getElementById('notif-' + id);
+        try {
+            const r = await fetch("{% url 'api_notification_delete' 0 %}".replace('0', id), {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCsrf() }
+            });
+            const data = await r.json();
+            if (data.deleted || data.ok) {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(20px)';
+                item.style.transition = 'all .3s';
+                setTimeout(() => item.remove(), 300);
+            }
+        } catch(e) {}
+    });
+});
+
+// Mark all read
+document.getElementById('markAllBtn')?.addEventListener('click', async function() {
+    try {
+        await fetch('/api/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrf() }
+        });
+        document.querySelectorAll('.notif-unread').forEach(el => {
+            el.classList.remove('notif-unread');
+            el.style.borderColor = 'var(--lk-card-border)';
+            el.querySelector('.badge')?.remove();
+            const bar = el.querySelector('div[style*="height:2px"]');
+            if (bar) bar.remove();
+        });
+        this.style.display = 'none';
+    } catch(e) {}
+});
+</script>
+{% endblock %}

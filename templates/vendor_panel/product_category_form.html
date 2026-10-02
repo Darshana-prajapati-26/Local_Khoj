@@ -1,0 +1,25 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_content %}
+<div class="container py-5">
+  <div class="card p-4 shadow-sm">
+    <h3 class="mb-4">Add Product Category</h3>
+    <form method="POST" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors|join:', ' }}</div>
+      {% endif %}
+      {% for field in form %}
+      <div class="mb-3">
+        {{ field.label_tag }}
+        {{ field }}
+        {% if field.errors %}
+        <div class="text-danger small">{{ field.errors|join:', ' }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <button class="btn btn-success">Create Category</button>
+      <a href="{% url 'vendor:dashboard' %}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,528 @@
+﻿{% load static core_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Local Khoj — Find Everything Near You{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Varela+Round&family=Noto+Sans+Devanagari:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script>(function(){var t=localStorage.getItem('lk-theme')||'dark';document.documentElement.classList.toggle('dark',t==='dark');})();</script>
+    <style>
+        body{font-family:'Inter',sans-serif;color:var(--lk-body-fg);min-height:100vh;position:relative;transition:background .3s,color .3s;}
+        html:not(.dark) body{background:linear-gradient(135deg,#f0f4f8 0%,#e8eef5 100%);}
+        html.dark body{background:radial-gradient(ellipse at 20% 20%,#141720 0%,#0a0b10 60%,#050608 100%);}
+        body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background-image:radial-gradient(circle at 15% 25%,var(--lk-orb1) 0%,transparent 45%),radial-gradient(circle at 85% 75%,var(--lk-orb2) 0%,transparent 45%),linear-gradient(var(--lk-grid) 1px,transparent 1px),linear-gradient(90deg,var(--lk-grid) 1px,transparent 1px);background-size:100% 100%,100% 100%,60px 60px,60px 60px;z-index:-1;pointer-events:none;}
+        .logo-container{display:flex;flex-direction:column;line-height:1;text-decoration:none!important;user-select:none;padding:5px 0;}
+        .logo-main{font-family:'Varela Round',sans-serif;font-weight:700;font-size:2.2rem;display:flex;align-items:center;letter-spacing:-1px;}
+        .logo-l1{color:#00a8ff;}.logo-l2{color:#0097e6;}.logo-l3{color:#44bd32;}.logo-l4{color:#4cd137;}
+        .logo-o-glass{font-size:1.8rem;margin:0 2px;transition:color .3s;}
+        /* Logo search icon — always visible on both themes */
+        html:not(.dark) .logo-o-glass{color:#0097e6;}
+        html.dark .logo-o-glass{color:#f1f2f6;}
+        .logo-hindi{font-family:'Noto Sans Devanagari',sans-serif;font-weight:700;font-size:1.8rem;margin-top:-8px;margin-left:20px;background:linear-gradient(90deg,#00a8ff 0%,#fbc531 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+        .navbar{background:var(--lk-nav-bg)!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--lk-nav-border);box-shadow:0 2px 20px rgba(0,0,0,.08);padding:.6rem 0;transition:background .3s,border-color .3s;}
+        .nav-link{color:var(--lk-nav-link)!important;font-weight:500;font-size:.9rem;padding:.5rem .85rem!important;border-radius:8px;transition:all .2s;}
+        .nav-link:hover{color:var(--lk-primary)!important;background:rgba(0,210,255,.08);}
+        .navbar-toggler{border:1px solid var(--lk-nav-border);border-radius:8px;padding:.4rem .6rem;}
+        html.dark .navbar-toggler-icon{filter:invert(1);}
+        .btn-post-business{background:linear-gradient(135deg,#ff416c 0%,#ff4b2b 100%);color:white;border:none;font-weight:700;padding:.5rem 1.3rem;border-radius:10px;font-size:.88rem;letter-spacing:.02em;box-shadow:0 4px 15px rgba(255,65,108,.35);transition:all .22s;}
+        .btn-post-business:hover{background:linear-gradient(135deg,#e0365e 0%,#e04020 100%);color:white;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,65,108,.5);}
+        footer{background:var(--lk-footer-bg);color:white;border-top:1px solid rgba(255,255,255,.06);}
+        .footer-link{color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s;font-size:.88rem;}
+        .footer-link:hover{color:#00d2ff;}
+        .footer-social a{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);font-size:1.1rem;transition:all .22s;text-decoration:none;}
+        .footer-social a:hover{background:var(--lk-gradient);color:#fff;transform:translateY(-2px);}
+        .card{background:var(--lk-card-bg);border:1px solid var(--lk-card-border);border-radius:16px;overflow:hidden;transition:transform .25s,box-shadow .25s,background .3s,border-color .3s;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+        html:not(.dark) .card{box-shadow:0 2px 12px rgba(0,0,0,.06);}
+        .card-hover:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.15),0 0 0 1px rgba(0,210,255,.12);}
+        .card-header{background:rgba(0,210,255,.04);border-bottom:1px solid var(--lk-card-border);padding:.9rem 1.25rem;font-weight:700;font-size:.88rem;color:var(--lk-body-fg);}
+        .hero-section{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.65)),url('https://images.unsplash.com/photo-1533900298318-6b8da08a523e?auto=format&fit=crop&w=1600&q=80');background-size:cover;background-position:center;padding:120px 0 100px;color:white;text-align:center;position:relative;overflow:hidden;}
+        .hero-section::after{content:"";position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,transparent,var(--lk-body-bg));}
+        /* Hero text is ALWAYS white — dark photo overlay behind it */
+        .hero-section h1,.hero-section h2,.hero-section h3,.hero-section p,.hero-section span{color:#fff!important;}
+        .hero-section h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.02em;text-shadow:0 2px 20px rgba(0,0,0,.4);}
+        .hero-section .hero-sub{font-size:1.1rem;color:rgba(255,255,255,.8)!important;margin-bottom:2rem;}
+        .search-container{max-width:680px;margin:0 auto;background:rgba(255,255,255,.12);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:6px 6px 6px 20px;border-radius:16px;display:flex;align-items:center;box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 1px rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);}
+        .search-container input{border:none;padding:10px 12px 10px 0;flex-grow:1;outline:none;font-size:1rem;color:white;background:transparent;font-weight:500;}
+        .search-container input::placeholder{color:rgba(255,255,255,.55);}
+        .search-container .btn-search{background:var(--lk-gradient);color:white;border:none;padding:0 28px;height:44px;border-radius:12px;font-weight:700;font-size:.95rem;letter-spacing:.02em;box-shadow:0 4px 15px rgba(0,210,255,.4);transition:all .22s;white-space:nowrap;flex-shrink:0;}
+        .search-container .btn-search:hover{background:linear-gradient(135deg,#00b8e0,#2d6abf);box-shadow:0 6px 20px rgba(0,210,255,.55);}
+        .cat-item{text-align:center;padding:22px 16px;border-radius:16px;background:var(--lk-card-bg);backdrop-filter:blur(12px);box-shadow:0 4px 20px rgba(0,0,0,.08),0 0 0 1px var(--lk-card-border);transition:all .25s;display:block;text-decoration:none;color:var(--lk-body-fg);border:1px solid var(--lk-card-border);}
+        .cat-item:hover{transform:translateY(-6px);box-shadow:0 16px 35px rgba(0,0,0,.15),0 0 0 1px rgba(0,210,255,.25);color:#00d2ff;border-color:rgba(0,210,255,.25);background:rgba(0,210,255,.06);}
+        .cat-icon{font-size:2.2rem;margin-bottom:10px;display:block;transition:transform .25s;}
+        .cat-item:hover .cat-icon{transform:scale(1.15);}
+        .listing-card{border:1px solid var(--lk-card-border);box-shadow:0 4px 20px rgba(0,0,0,.08);}
+        .listing-img{height:185px;object-fit:cover;transition:transform .35s;}
+        .listing-card:hover .listing-img{transform:scale(1.04);}
+        .listing-badge{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);padding:4px 10px;border-radius:20px;font-size:.8rem;font-weight:700;color:#fff;border:1px solid rgba(255,255,255,.15);}
+        .rating-star{color:#ffc107;margin-right:3px;}
+        .btn-call{background:var(--lk-card-bg);border:1px solid var(--lk-card-border);color:var(--lk-body-fg);font-size:.83rem;padding:7px 12px;border-radius:9px;transition:all .2s;}
+        .btn-call:hover{background:rgba(0,210,255,.08);color:var(--lk-primary);}
+        .btn-direction{background:var(--lk-gradient);color:#fff;font-size:.83rem;padding:7px 12px;border-radius:9px;border:none;transition:all .2s;}
+        .btn-direction:hover{background:linear-gradient(135deg,#2d6abf,#00b8e0);color:#fff;}
+        .cta-banner{background:linear-gradient(135deg,rgba(0,210,255,.1) 0%,rgba(58,123,213,.1) 100%);border:1px solid rgba(0,210,255,.2);color:var(--lk-body-fg);padding:48px 40px;border-radius:20px;display:flex;justify-content:space-between;align-items:center;margin:60px 0;position:relative;overflow:hidden;}
+        .cta-banner::before{content:"";position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:radial-gradient(circle,rgba(0,210,255,.12) 0%,transparent 70%);pointer-events:none;}
+        /* CTA banner text always readable */
+        .cta-banner h2{color:var(--lk-body-fg)!important;}
+        .cta-banner .cta-sub{color:var(--lk-muted)!important;}
+        .cta-banner .cta-note{color:var(--lk-muted)!important;}
+        @media(max-width:768px){.cta-banner{flex-direction:column;text-align:center;gap:24px;padding:32px 24px;}}
+        .notif-dropdown .dropdown-menu{background:var(--lk-card-bg);border:1px solid var(--lk-card-border);border-radius:14px;box-shadow:0 20px 40px rgba(0,0,0,.25);min-width:320px;padding:8px;}
+        .notif-dropdown .dropdown-item{border-radius:10px;padding:10px 12px;color:var(--lk-body-fg);transition:background .18s;}
+        .notif-dropdown .dropdown-item:hover{background:rgba(0,210,255,.08);}
+        .navbar .form-select{background-color:transparent;color:var(--lk-nav-link);border:none;}
+        .navbar .form-select option{background:var(--lk-surface-1);color:var(--lk-body-fg);}
+        html:not(.dark) h1,html:not(.dark) h2,html:not(.dark) h3,html:not(.dark) h4,html:not(.dark) h5,html:not(.dark) h6{color:#0f172a;}
+        /* Hero is always dark-overlay — keep white */
+        html:not(.dark) .hero-section h1,
+        html:not(.dark) .hero-section h2,
+        html:not(.dark) .hero-section h3 { color:#fff!important; }
+        html:not(.dark) .text-muted{color:#64748b!important;}
+        html:not(.dark) .card-header{color:#0f172a;}
+        html:not(.dark) .listing-card .card-title,html:not(.dark) .listing-card h5{color:#0f172a;}
+        /* Theme toggle pill */
+        .theme-toggle-btn{width:72px;height:36px;border-radius:20px;border:1.5px solid var(--lk-card-border);background:var(--lk-surface-1);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:space-between;padding:0 8px;overflow:hidden;transition:background .3s,border-color .3s;}
+        .theme-toggle-btn .t-sun{color:#f59e0b;font-size:.85rem;z-index:1;}
+        .theme-toggle-btn .t-moon{color:#818cf8;font-size:.85rem;z-index:1;}
+        .theme-toggle-btn .t-knob{position:absolute;width:26px;height:26px;border-radius:50%;background:var(--lk-gradient);box-shadow:0 2px 8px rgba(0,210,255,.4);transition:left .3s cubic-bezier(.4,0,.2,1);top:50%;transform:translateY(-50%);}
+        html:not(.dark) .theme-toggle-btn .t-knob{left:4px;}
+        html.dark .theme-toggle-btn .t-knob{left:calc(100% - 30px);}
+        html:not(.dark) .theme-toggle-btn{background:#e0f2fe;border-color:#bae6fd;}
+        html.dark .theme-toggle-btn{background:#1e1b4b;border-color:rgba(129,140,248,.3);}
+        /* status pills */
+        .status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:.78rem;font-weight:600;}
+        .status-pill.active{background:rgba(56,239,125,.15);color:#38ef7d;}
+        .status-pill.inactive{background:rgba(255,65,108,.15);color:#ff6b8a;}
+        .status-pill.pending{background:rgba(255,210,0,.15);color:#ffd200;}
+        .text-gradient{background:var(--lk-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <div class="logo-container">
+                    <div class="logo-main">
+                        <span class="logo-l1">L</span>
+                        <i class="bi bi-search logo-o-glass"></i>
+                        <span class="logo-l2">c</span>
+                        <span class="logo-l3">a</span>
+                        <span class="logo-l4">l</span>
+                    </div>
+                    <div class="logo-hindi">खोज</div>
+                </div>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <!-- Location selector: State / City / Near Me -->
+                        <form action="{% url 'search' %}" method="get" id="navLocForm" class="d-flex align-items-center gap-1">
+                            <input type="hidden" name="state" id="navStateVal">
+                            <input type="hidden" name="city"  id="navCityVal">
+                            <input type="hidden" name="lat"   id="navLat">
+                            <input type="hidden" name="lng"   id="navLng">
+                            <input type="hidden" name="sort"  id="navSort">
+
+                            <!-- State picker -->
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-sm dropdown-toggle d-flex align-items-center gap-1"
+                                    style="background:transparent;border:1px solid rgba(0,210,255,.25);color:#00d2ff;border-radius:8px;font-size:.8rem;padding:4px 10px;white-space:nowrap;"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-map" style="font-size:.8rem;"></i>
+                                    <span id="navStateLbl">State</span>
+                                </button>
+                                <ul class="dropdown-menu p-2" style="background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:12px;min-width:200px;max-height:280px;overflow-y:auto;">
+                                    <li><input type="text" id="navStateSearch" class="form-control form-control-sm mb-1" placeholder="Search state..." style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:#fff;font-size:.8rem;"></li>
+                                    <li><a class="dropdown-item nav-state-opt" href="#" data-val="" style="color:#64748b;font-size:.82rem;">All States</a></li>
+                                    {% for s in all_states %}
+                                    <li><a class="dropdown-item nav-state-opt" href="#" data-val="{{ s.id }}" data-name="{{ s.name }}" style="color:#e2e8f0;font-size:.82rem;">{{ s.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <!-- City picker -->
+                            <div class="dropdown">
+                                <button type="button" class="btn btn-sm dropdown-toggle d-flex align-items-center gap-1"
+                                    style="background:transparent;border:1px solid rgba(255,255,255,.15);color:var(--lk-nav-link);border-radius:8px;font-size:.8rem;padding:4px 10px;white-space:nowrap;"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-geo-alt-fill" style="color:#00d2ff;font-size:.8rem;"></i>
+                                    <span id="navCityLbl">City</span>
+                                </button>
+                                <ul class="dropdown-menu p-2" style="background:#0f1117;border:1px solid rgba(255,255,255,.1);border-radius:12px;min-width:200px;max-height:280px;overflow-y:auto;">
+                                    <li><input type="text" id="navCitySearch" class="form-control form-control-sm mb-1" placeholder="Search city..." style="background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.1);color:#fff;font-size:.8rem;"></li>
+                                    <li><a class="dropdown-item nav-city-opt" href="#" data-val="" style="color:#64748b;font-size:.82rem;">All Cities</a></li>
+                                    {% for c in all_cities %}
+                                    <li class="nav-city-item" data-state="{{ c.state_id }}">
+                                        <a class="dropdown-item nav-city-opt" href="#" data-val="{{ c.id }}" data-name="{{ c.name }}" style="color:#e2e8f0;font-size:.82rem;">{{ c.name }}</a>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <!-- Near Me -->
+                            <button type="button" id="navLocBtn" title="Use my location"
+                                style="background:transparent;border:1px solid rgba(0,210,255,.25);color:#00d2ff;border-radius:8px;padding:4px 10px;font-size:.8rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px;">
+                                <i class="bi bi-crosshair" id="navLocIcon"></i>
+                                <span id="navLocLbl" class="d-none d-xl-inline">Near Me</span>
+                            </button>
+                        </form>
+                    </li>
+
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'cart_view' %}">
+                            <i class="bi bi-bag2 fs-5"></i>
+                            {% get_cart_count user as count %}
+                            {% if count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                                style="background:linear-gradient(135deg,#ff416c,#ff4b2b);font-size:.65rem;" id="cartCount">{{ count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- Notifications bell → links to full page -->
+                    <li class="nav-item dropdown notif-dropdown">
+                        <a class="nav-link position-relative" href="{% url 'notifications_page' %}" id="notifToggle">
+                            <i class="bi bi-bell fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill"
+                                style="background:linear-gradient(135deg,#00d2ff,#3a7bd5);font-size:.65rem;display:none;" id="notifBadge">0</span>
+                        </a>
+                    </li>
+
+                    <!-- Messages -->
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'messages_inbox' %}" title="Messages">
+                            <i class="bi bi-chat-dots fs-5"></i>
+                        </a>
+                    </li>
+
+                    {% if user.is_staff or user.is_superuser or user.user_type == "admin" %}
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="{% url 'admin_panel:dashboard' %}" style="color:#ff6b8a!important;">
+                            <i class="bi bi-shield-lock me-1"></i>Admin
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% if user.user_type == "vendor" %}
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" href="{% url 'vendor:dashboard' %}" style="color:#00d2ff!important;">
+                            <i class="bi bi-shop me-1"></i>Vendor
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-grid me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'order_history' %}"><i class="bi bi-bag-check me-1"></i>Orders</a>
+                    </li>
+                    <li class="nav-item ms-1">
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm"
+                                style="background:rgba(128,128,128,.12);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:9px;padding:6px 14px;font-size:.85rem;">
+                                <i class="bi bi-box-arrow-right me-1"></i>Logout
+                            </button>
+                        </form>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}"><i class="bi bi-person me-1"></i>Login</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item ms-1">
+                        <a href="{% url 'stores:create_store' %}" class="btn btn-post-business">
+                            <i class="bi bi-plus-circle me-1"></i>Post Business
+                        </a>
+                    </li>
+
+                    <!-- Theme Toggle -->
+                    <li class="nav-item ms-2">
+                        <button id="themeToggle" class="theme-toggle-btn" title="Toggle light / dark mode">
+                            <i class="bi bi-sun-fill t-sun"></i>
+                            <span class="t-knob"></span>
+                            <i class="bi bi-moon-fill t-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+            {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-exclamation-circle-fill"></i>
+            {% elif message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill"></i>
+            {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <!-- FOOTER -->
+    <footer class="mt-5 py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="logo-container mb-3">
+                        <div class="logo-main">
+                            <span class="logo-l1">L</span>
+                            <i class="bi bi-search logo-o-glass" style="color:#f1f2f6;"></i>
+                            <span class="logo-l2">c</span><span class="logo-l3">a</span><span class="logo-l4">l</span>
+                        </div>
+                        <div class="logo-hindi">खोज</div>
+                    </div>
+                    <p class="small mb-3" style="color:rgba(255,255,255,.4);line-height:1.7;">
+                        Your one-stop destination to discover and support local businesses in your city.
+                    </p>
+                    <div class="footer-social d-flex gap-2">
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-whatsapp"></i></a>
+                        <a href="#"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 offset-md-1">
+                    <h6 class="fw-bold mb-3 text-white" style="font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;">Explore</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'stores:store_list' %}" class="footer-link">Browse Stores</a></li>
+                        <li class="mb-2"><a href="{% url 'explore' %}" class="footer-link">Explore</a></li>
+                        <li class="mb-2"><a href="{% url 'stores:create_store' %}" class="footer-link">List Your Business</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h6 class="fw-bold mb-3 text-white" style="font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="footer-link">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="footer-link">Cookie Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="fw-bold mb-3 text-white" style="font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;">Contact</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 footer-link"><i class="bi bi-geo-alt me-2" style="color:#00d2ff;"></i>Ahmedabad, Gujarat, India</li>
+                        <li class="mb-2 footer-link"><i class="bi bi-telephone me-2" style="color:#00d2ff;"></i>+91 7041692707</li>
+                        <li class="footer-link"><i class="bi bi-envelope me-2" style="color:#00d2ff;"></i>support@localkhoj.com</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color:rgba(255,255,255,.07);">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span class="small" style="color:rgba(255,255,255,.3);">© 2026 Local Khoj. All rights reserved.</span>
+                <span class="small" style="color:rgba(255,255,255,.2);">Made with <i class="bi bi-heart-fill text-danger"></i> in India</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Theme toggle logic -->
+    <script>
+    (function(){
+        function applyTheme(t){
+            document.documentElement.classList.toggle('dark', t==='dark');
+            localStorage.setItem('lk-theme', t);
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            var btn = document.getElementById('themeToggle');
+            if(!btn) return;
+            btn.addEventListener('click', function(){
+                var isDark = document.documentElement.classList.contains('dark');
+                applyTheme(isDark ? 'light' : 'dark');
+            });
+        });
+    })();
+    </script>
+
+    <!-- Notification polling -->
+    <script>
+    async function pollNotif(){
+        try{
+            const r = await fetch("{% url 'api_notifications' %}");
+            const data = await r.json();
+            const badge = document.getElementById('notifBadge');
+            const menu  = document.getElementById('notifMenu');
+            if(!badge||!menu) return;
+            badge.style.display = data.count>0 ? 'inline' : 'none';
+            badge.textContent = data.count;
+            menu.innerHTML = '';
+            if(data.items && data.items.length){
+                data.items.forEach(i=>{
+                    const li = document.createElement('li');
+                    li.className='dropdown-item d-flex justify-content-between align-items-start';
+                    // Determine link
+                    let url = i.link_url || null;
+                    if (!url && i.type === 'message' && i.store_slug) url = '/chat/' + i.store_slug + '/';
+                    else if (!url && i.type === 'review' && i.store_slug) url = '/stores/store/' + i.store_slug + '/#tab-reviews';
+                    else if (!url && i.type === 'lead') url = '/vendor/leads/';
+                    else if (!url && i.type === 'payment') url = '/orders/orders/';
+                    const titleHtml = url
+                        ? `<a href="${url}" style="color:var(--lk-body-fg);text-decoration:none;font-weight:600;">${i.title}</a>`
+                        : `<strong>${i.title}</strong>`;
+                    li.innerHTML = "<div>" + titleHtml + "<br><small class='text-muted'>"+(i.body||"")+"</small></div>"
+                        +"<button class='btn btn-sm btn-outline-danger ms-2' data-del='"+i.id+"'>×</button>";
+                    menu.appendChild(li);
+                });
+                });
+            } else {
+                const li=document.createElement('li');
+                li.className='dropdown-item small';
+                li.style.color='var(--lk-muted)';
+                li.textContent='No new notifications';
+                menu.appendChild(li);
+            }
+        }catch(e){}
+    }
+    function getCsrf(){const m=document.cookie.match(/csrftoken=([^;]+)/);return m?m[1]:'';}
+    document.addEventListener('DOMContentLoaded',()=>{
+        pollNotif(); setInterval(pollNotif,5000);
+        const menu=document.getElementById('notifMenu');
+        if(menu){
+            menu.addEventListener('click',async(e)=>{
+                const btn=e.target.closest('button[data-del]');
+                if(!btn) return;
+                await fetch("{% url 'api_notification_delete' 0 %}".replace('0',btn.getAttribute('data-del')),
+                    {method:'POST',headers:{'X-CSRFToken':getCsrf()}});
+                pollNotif();
+            });
+        }
+    });
+    </script>
+
+    <!-- Voice search -->
+    <script>
+    document.addEventListener('DOMContentLoaded',()=>{
+        const voiceBtn=document.getElementById('voiceBtn');
+        const qInput=document.querySelector('form[action$="search"] input[name="q"]');
+        if(!voiceBtn||!qInput) return;
+        const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+        if(!SR){voiceBtn.style.display='none';return;}
+        const rec=new SR(); rec.lang='en-IN'; rec.continuous=false; rec.interimResults=false;
+        voiceBtn.addEventListener('click',()=>rec.start());
+        rec.onresult=(e)=>{qInput.value=Array.from(e.results).map(r=>r[0].transcript).join(' ');};
+    });
+    </script>
+
+    <!-- Navbar location selector JS -->
+    <script>
+    (function(){
+        const stateVal  = document.getElementById('navStateVal');
+        const cityVal   = document.getElementById('navCityVal');
+        const stateLbl  = document.getElementById('navStateLbl');
+        const cityLbl   = document.getElementById('navCityLbl');
+        const form      = document.getElementById('navLocForm');
+        if (!form) return;
+
+        // State select
+        document.querySelectorAll('.nav-state-opt').forEach(function(a){
+            a.addEventListener('click', function(e){
+                e.preventDefault();
+                const val  = this.dataset.val || '';
+                const name = this.dataset.name || 'State';
+                stateVal.value = val;
+                stateLbl.textContent = val ? name : 'State';
+                // Reset city
+                cityVal.value = '';
+                cityLbl.textContent = 'City';
+                // Filter city list
+                document.querySelectorAll('.nav-city-item').forEach(function(li){
+                    li.style.display = (!val || li.dataset.state === val) ? '' : 'none';
+                });
+                // Auto-submit to show all stores in that state
+                if (val) { document.getElementById('navSort').value = ''; form.submit(); }
+            });
+        });
+
+        // City select
+        document.querySelectorAll('.nav-city-opt').forEach(function(a){
+            a.addEventListener('click', function(e){
+                e.preventDefault();
+                cityVal.value = this.dataset.val || '';
+                cityLbl.textContent = this.dataset.name || 'City';
+                if (this.dataset.val) form.submit();
+            });
+        });
+
+        // State search
+        const ss = document.getElementById('navStateSearch');
+        if (ss) ss.addEventListener('input', function(){
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.nav-state-opt').forEach(function(a){
+                a.closest('li').style.display = (!q || (a.dataset.name||'').toLowerCase().includes(q)) ? '' : 'none';
+            });
+        });
+
+        // City search
+        const cs = document.getElementById('navCitySearch');
+        if (cs) cs.addEventListener('input', function(){
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('.nav-city-opt').forEach(function(a){
+                a.closest('li').style.display = (!q || (a.dataset.name||'').toLowerCase().includes(q)) ? '' : 'none';
+            });
+        });
+
+        // Near Me
+        const locBtn  = document.getElementById('navLocBtn');
+        const locIcon = document.getElementById('navLocIcon');
+        const locLbl  = document.getElementById('navLocLbl');
+        if (locBtn) {
+            locBtn.addEventListener('click', function(){
+                if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+                locIcon.className = 'bi bi-arrow-repeat nav-spin';
+                locBtn.disabled = true;
+                navigator.geolocation.getCurrentPosition(
+                    function(pos){
+                        document.getElementById('navLat').value  = pos.coords.latitude;
+                        document.getElementById('navLng').value  = pos.coords.longitude;
+                        document.getElementById('navSort').value = 'distance';
+                        locIcon.className = 'bi bi-geo-alt-fill';
+                        if (locLbl) locLbl.textContent = 'Near Me ✓';
+                        locBtn.disabled = false;
+                        form.submit();
+                    },
+                    function(){
+                        locIcon.className = 'bi bi-crosshair';
+                        locBtn.disabled = false;
+                        alert('Could not get location. Please allow location access.');
+                    },
+                    { timeout: 8000 }
+                );
+            });
+        }
+    })();
+    </script>
+    <style>
+    @keyframes nav-spin { to { transform:rotate(360deg); } }
+    .nav-spin { display:inline-block; animation:nav-spin .7s linear infinite; }
+    .nav-state-opt:hover, .nav-city-opt:hover { background:rgba(0,210,255,.1)!important; color:#00d2ff!important; }
+    </style>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
+c:\Users\HP\OneDrive\Pictures\Screenshots\Screenshot 2026-04-13 200731.png

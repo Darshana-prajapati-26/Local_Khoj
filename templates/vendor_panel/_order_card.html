@@ -1,0 +1,133 @@
+<div class="card" style="border:1px solid {% if row.order.status == 'pending' %}rgba(255,210,0,.25){% elif row.order.status == 'cancelled' %}rgba(255,65,108,.2){% elif row.order.status == 'delivered' or row.order.status == 'completed' %}rgba(56,239,125,.15){% else %}var(--lk-card-border){% endif %};border-radius:14px;overflow:hidden;">
+
+    <!-- Order Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 px-4 py-3"
+        style="background:{% if row.order.status == 'pending' %}rgba(255,210,0,.05){% else %}rgba(0,210,255,.03){% endif %};border-bottom:1px solid var(--lk-card-border);">
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="fw-bold" style="color:var(--lk-body-fg);font-size:.95rem;">Order #{{ row.order.id }}</span>
+            <span class="small" style="color:var(--lk-muted);">{{ row.order.created_at|date:"d M Y, g:i A" }}</span>
+            <span class="badge text-capitalize"
+                style="{% if row.order.status == 'delivered' or row.order.status == 'completed' %}background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);{% elif row.order.status == 'cancelled' %}background:rgba(255,65,108,.12);color:#ff6b8a;border:1px solid rgba(255,65,108,.2);{% elif row.order.status == 'pending' %}background:rgba(255,210,0,.15);color:#ffd200;border:1px solid rgba(255,210,0,.3);{% elif row.order.status == 'shipped' or row.order.status == 'out_for_delivery' %}background:rgba(0,210,255,.12);color:#00d2ff;border:1px solid rgba(0,210,255,.2);{% else %}background:rgba(255,255,255,.07);color:var(--lk-body-fg);border:1px solid var(--lk-card-border);{% endif %}font-size:.75rem;">
+                {% if row.order.status == 'pending' %}<i class="bi bi-clock-fill me-1"></i>{% endif %}
+                {{ row.order.get_status_display }}
+            </span>
+        </div>
+        <span class="fw-bold" style="color:#38ef7d;font-size:1rem;">₹{{ row.vendor_total }}</span>
+    </div>
+
+    <div class="row g-0">
+
+        <!-- Customer + Address -->
+        <div class="col-md-4 p-4" style="border-right:1px solid var(--lk-card-border);">
+            <p class="text-uppercase fw-bold mb-2" style="font-size:.65rem;letter-spacing:.08em;color:#00d2ff;">Customer</p>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#3a7bd5);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.9rem;flex-shrink:0;">
+                    {{ row.order.user.username|first|upper }}
+                </div>
+                <div>
+                    <div class="fw-semibold" style="color:var(--lk-body-fg);">
+                        {{ row.order.delivery_name|default:row.order.user.get_full_name|default:row.order.user.username }}
+                    </div>
+                    <div class="small" style="color:var(--lk-muted);">@{{ row.order.user.username }}</div>
+                </div>
+            </div>
+            {% if row.order.user.email %}
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <i class="bi bi-envelope-fill" style="color:#00d2ff;font-size:.78rem;width:14px;"></i>
+                <a href="mailto:{{ row.order.user.email }}" class="small text-decoration-none" style="color:var(--lk-body-fg);">{{ row.order.user.email }}</a>
+            </div>
+            {% endif %}
+            {% with phone=row.order.delivery_phone|default:row.order.user.phone %}
+            {% if phone %}
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-telephone-fill" style="color:#38ef7d;font-size:.78rem;width:14px;"></i>
+                <a href="tel:{{ phone }}" class="small text-decoration-none fw-semibold" style="color:#38ef7d;">{{ phone }}</a>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <p class="text-uppercase fw-bold mb-2" style="font-size:.65rem;letter-spacing:.08em;color:#00d2ff;">
+                {% if row.order.is_service_order %}Service Location{% else %}Delivery Address{% endif %}
+            </p>
+            {% if row.order.delivery_address %}
+            <div class="d-flex align-items-start gap-2 mb-2">
+                <i class="bi bi-geo-alt-fill mt-1" style="color:#ff6b8a;font-size:.82rem;flex-shrink:0;"></i>
+                <p class="small mb-0" style="color:var(--lk-body-fg);line-height:1.6;">{{ row.order.delivery_address }}</p>
+            </div>
+            <a href="https://www.google.com/maps/search/?api=1&query={{ row.order.delivery_address|urlencode }}"
+                target="_blank" class="btn btn-sm"
+                style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:8px;font-size:.75rem;">
+                <i class="bi bi-map me-1"></i>View on Map
+            </a>
+            {% else %}
+            <p class="small mb-0" style="color:var(--lk-muted);">No address provided</p>
+            {% endif %}
+        </div>
+
+        <!-- Items -->
+        <div class="col-md-5 p-4" style="border-right:1px solid var(--lk-card-border);">
+            <p class="text-uppercase fw-bold mb-3" style="font-size:.65rem;letter-spacing:.08em;color:#00d2ff;">Items Ordered</p>
+            <div class="d-flex flex-column gap-2">
+                {% for item in row.vendor_items %}
+                <div class="d-flex align-items-center gap-3 p-2 rounded-3" style="background:rgba(255,255,255,.03);border:1px solid var(--lk-card-border);">
+                    <div style="width:42px;height:42px;border-radius:8px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,.05);">
+                        {% if item.product and item.product.image %}
+                        <img src="{{ item.product.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                        {% elif item.service and item.service.image %}
+                        <img src="{{ item.service.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                        {% else %}
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                            <i class="bi bi-{% if item.service %}gear-fill{% else %}box-seam{% endif %}" style="color:#00d2ff;font-size:.9rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="fw-semibold text-truncate" style="color:var(--lk-body-fg);font-size:.88rem;">
+                            {% if item.product %}{{ item.product.name }}{% elif item.service %}{{ item.service.name }}{% endif %}
+                        </div>
+                        <div class="small" style="color:var(--lk-muted);">Qty: {{ item.quantity }} × ₹{{ item.price }}</div>
+                    </div>
+                    <div class="fw-bold flex-shrink-0" style="color:#38ef7d;font-size:.88rem;">₹{{ item.get_total_price }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top:1px solid var(--lk-card-border);">
+                <span class="small fw-semibold" style="color:var(--lk-muted);">Your Total</span>
+                <span class="fw-bold" style="color:#38ef7d;font-size:1rem;">₹{{ row.vendor_total }}</span>
+            </div>
+        </div>
+
+        <!-- Status + Actions -->
+        <div class="col-md-3 p-4 d-flex flex-column justify-content-between">
+            <div>
+                <p class="text-uppercase fw-bold mb-3" style="font-size:.65rem;letter-spacing:.08em;color:#00d2ff;">Update Status</p>
+                <form method="post" action="{% url 'vendor:order_status' row.order.id %}">
+                    {% csrf_token %}
+                    <select name="status" class="form-select mb-3" style="font-size:.88rem;">
+                        {% for k, v in row.order.STATUS_CHOICES %}
+                        <option value="{{ k }}" {% if k == row.order.status %}selected{% endif %}>{{ v }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle me-1"></i>Update
+                    </button>
+                </form>
+            </div>
+            {% with phone=row.order.delivery_phone|default:row.order.user.phone %}
+            {% if phone %}
+            <div class="mt-3 d-flex flex-column gap-2">
+                <a href="tel:{{ phone }}" class="btn btn-sm w-100"
+                    style="background:rgba(56,239,125,.1);border:1px solid rgba(56,239,125,.2);color:#38ef7d;border-radius:9px;">
+                    <i class="bi bi-telephone-fill me-1"></i>Call Customer
+                </a>
+                <a href="https://wa.me/91{{ phone }}" target="_blank" class="btn btn-sm w-100"
+                    style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);color:#25d366;border-radius:9px;">
+                    <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                </a>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+
+    </div>
+</div>

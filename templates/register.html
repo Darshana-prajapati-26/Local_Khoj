@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Create Account — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5" style="background:radial-gradient(ellipse at 70% 40%,rgba(58,123,213,0.06) 0%,transparent 60%);">
+    <div class="w-100" style="max-width:500px;padding:0 1rem;">
+
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <div class="logo-container d-inline-flex flex-column align-items-center">
+                    <div class="logo-main">
+                        <span class="logo-l1">L</span>
+                        <i class="bi bi-search logo-o-glass" style="color:#f1f2f6;"></i>
+                        <span class="logo-l2">c</span><span class="logo-l3">a</span><span class="logo-l4">l</span>
+                    </div>
+                    <div class="logo-hindi">खोज</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="card p-4 p-md-5" style="border:1px solid rgba(58,123,213,0.15);background:rgba(17,19,25,0.9);">
+            <div class="text-center mb-4">
+                <h4 class="fw-bold mb-1" style="color:#fff;">Create your account</h4>
+                <p class="small mb-0" style="color:#64748b;">Join thousands of local businesses and customers</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>{{ form.non_field_errors|join:', ' }}
+            </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        {{ form.username }}
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="mt-1 small" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.username.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        {{ form.email }}
+                    </div>
+                    {% if form.email.errors %}
+                    <div class="mt-1 small" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.email.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Account Type -->
+                <div class="mb-3">
+                    <label class="form-label">Account Type</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                        {{ form.user_type }}
+                    </div>
+                    {% if form.user_type.errors %}
+                    <div class="mt-1 small" style="color:#ff6b8a;">{{ form.user_type.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password -->
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        {{ form.password1 }}
+                        <button type="button" class="input-group-text" onclick="togglePwd('id_password1','eye1')" style="cursor:pointer;border-radius:0 10px 10px 0;">
+                            <i class="bi bi-eye" id="eye1"></i>
+                        </button>
+                    </div>
+                    {% if form.password1.errors %}
+                    <div class="mt-1 small" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.password1.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="mb-4">
+                    <label class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                        {{ form.password2 }}
+                        <button type="button" class="input-group-text" onclick="togglePwd('id_password2','eye2')" style="cursor:pointer;border-radius:0 10px 10px 0;">
+                            <i class="bi bi-eye" id="eye2"></i>
+                        </button>
+                    </div>
+                    {% if form.password2.errors %}
+                    <div class="mt-1 small" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.password2.errors|join:', ' }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Password strength hint -->
+                <div class="mb-4 p-3 rounded-3" style="background:rgba(0,210,255,0.05);border:1px solid rgba(0,210,255,0.1);">
+                    <p class="small mb-1 fw-semibold" style="color:#00d2ff;font-size:0.78rem;">Password requirements:</p>
+                    <ul class="small mb-0 ps-3" style="color:#64748b;font-size:0.78rem;">
+                        <li>At least 8 characters</li>
+                        <li>Mix of letters and numbers recommended</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3" style="font-size:1rem;">
+                    <i class="bi bi-person-plus me-2"></i>Create Account
+                </button>
+
+                <div class="text-center">
+                    <span class="small" style="color:#64748b;">Already have an account?</span>
+                    <a href="{% url 'login' %}" class="small fw-semibold text-decoration-none ms-1" style="color:#00d2ff;">Sign in</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'home' %}" class="small text-decoration-none" style="color:#475569;">
+                <i class="bi bi-arrow-left me-1"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePwd(inputId, iconId) {
+    const inp = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!inp) return;
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        inp.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+// Fix input group border radius for form fields
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.input-group .form-control, .input-group .form-select').forEach(function(el) {
+        el.style.borderRadius = '0';
+        el.style.borderLeft = 'none';
+    });
+});
+</script>
+{% endblock %}

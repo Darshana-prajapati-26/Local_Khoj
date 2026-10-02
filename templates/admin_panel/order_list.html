@@ -1,0 +1,61 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Orders — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">Orders</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage all customer orders</p>
+    </div>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Order ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td class="ps-4 small" style="color:var(--adm-muted);">#{{ order.id }}</td>
+                    <td>
+                        <div class="fw-semibold" style="color:var(--adm-text);">{{ order.user.username }}</div>
+                        <div class="small" style="color:var(--adm-muted);">{{ order.user.email }}</div>
+                    </td>
+                    <td class="fw-semibold" style="color:var(--adm-text);">₹{{ order.total_amount }}</td>
+                    <td>
+                        <span class="badge text-capitalize"
+                            style="{% if order.status == 'completed' or order.status == 'delivered' %}background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);{% elif order.status == 'pending' %}background:rgba(255,210,0,.12);color:#ffd200;border:1px solid rgba(255,210,0,.2);{% elif order.status == 'cancelled' %}background:rgba(255,65,108,.12);color:#ff6b8a;border:1px solid rgba(255,65,108,.2);{% else %}background:rgba(255,255,255,.07);color:var(--adm-text);border:1px solid var(--adm-border);{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </td>
+                    <td class="small" style="color:var(--adm-muted);">{{ order.created_at|date:"M d, Y H:i" }}</td>
+                    <td class="text-end pe-4">
+                        <a href="{% url 'admin_panel:order_edit' order.pk %}" class="btn btn-sm"
+                            style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-bag-x fs-2 d-block mb-2"></i>No orders found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "admin_panel/pagination.html" with page_obj=page_obj %}
+{% endblock %}

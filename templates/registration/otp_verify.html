@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5"
+    style="background:radial-gradient(ellipse at 60% 40%,rgba(58,123,213,.07) 0%,transparent 60%);">
+    <div class="w-100" style="max-width:420px;padding:0 1rem;">
+
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <div class="logo-container d-inline-flex flex-column align-items-center">
+                    <div class="logo-main">
+                        <span class="logo-l1">L</span>
+                        <i class="bi bi-search logo-o-glass"></i>
+                        <span class="logo-l2">c</span><span class="logo-l3">a</span><span class="logo-l4">l</span>
+                    </div>
+                    <div class="logo-hindi">खोज</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="card p-4 p-md-5" style="border:1px solid rgba(0,210,255,.15);">
+
+            <!-- Icon -->
+            <div class="text-center mb-4">
+                <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,rgba(0,210,255,.15),rgba(58,123,213,.15));border:1px solid rgba(0,210,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                    <i class="bi bi-shield-lock-fill" style="font-size:1.8rem;color:#00d2ff;"></i>
+                </div>
+                <h4 class="fw-bold mb-1" style="color:var(--lk-body-fg);">Two-Factor Authentication</h4>
+                <p class="small mb-0" style="color:var(--lk-muted);">
+                    We sent a 6-digit code to<br>
+                    <strong style="color:var(--lk-body-fg);">{{ masked_email }}</strong>
+                </p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} d-flex align-items-start gap-2 mb-3">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill mt-1 flex-shrink-0"></i>
+                {% elif message.tags == 'info' %}<i class="bi bi-info-circle-fill mt-1 flex-shrink-0"></i>
+                {% elif message.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill mt-1 flex-shrink-0"></i>
+                {% else %}<i class="bi bi-exclamation-circle-fill mt-1 flex-shrink-0"></i>{% endif %}
+                <span>{{ message|safe }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="action" value="verify">
+
+                <!-- OTP Input boxes -->
+                <div class="mb-4">
+                    <label class="form-label text-center d-block">Enter OTP</label>
+                    <div class="d-flex justify-content-center gap-2" id="otpBoxes">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="0" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="1" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="2" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="3" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="4" inputmode="numeric" pattern="[0-9]">
+                        <input type="text" maxlength="1" class="otp-box" data-idx="5" inputmode="numeric" pattern="[0-9]">
+                    </div>
+                    <!-- Hidden combined input -->
+                    <input type="hidden" name="otp" id="otpHidden">
+                </div>
+
+                <!-- Countdown -->
+                <div class="text-center mb-3">
+                    <span class="small" style="color:var(--lk-muted);">Code expires in </span>
+                    <span id="countdown" class="small fw-bold" style="color:#00d2ff;">10:00</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3" style="font-size:1rem;" id="verifyBtn">
+                    <i class="bi bi-shield-check me-2"></i>Verify & Sign In
+                </button>
+            </form>
+
+            <!-- Resend -->
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="resend">
+                <button type="submit" class="btn w-100" id="resendBtn"
+                    style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:10px;font-size:.88rem;">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Resend OTP
+                </button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'login' %}" class="small text-decoration-none" style="color:var(--lk-muted);">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.otp-box {
+    width: 48px; height: 56px;
+    text-align: center; font-size: 1.4rem; font-weight: 700;
+    border-radius: 12px; border: 2px solid var(--lk-input-border);
+    background: var(--lk-input-bg); color: var(--lk-body-fg);
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+}
+.otp-box:focus {
+    border-color: #00d2ff;
+    box-shadow: 0 0 0 3px rgba(0,210,255,.18);
+}
+.otp-box.filled {
+    border-color: rgba(0,210,255,.4);
+    background: rgba(0,210,255,.06);
+}
+@media(max-width:400px){ .otp-box { width:40px; height:48px; font-size:1.2rem; } }
+</style>
+
+<script>
+// OTP box navigation
+const boxes = document.querySelectorAll('.otp-box');
+const hidden = document.getElementById('otpHidden');
+
+boxes.forEach((box, i) => {
+    box.addEventListener('input', e => {
+        const val = e.target.value.replace(/\D/g,'');
+        e.target.value = val;
+        if (val) {
+            box.classList.add('filled');
+            if (i < boxes.length - 1) boxes[i+1].focus();
+        } else {
+            box.classList.remove('filled');
+        }
+        hidden.value = Array.from(boxes).map(b => b.value).join('');
+    });
+    box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && i > 0) {
+            boxes[i-1].focus();
+            boxes[i-1].value = '';
+            boxes[i-1].classList.remove('filled');
+        }
+    });
+    box.addEventListener('paste', e => {
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+        paste.split('').forEach((ch, j) => {
+            if (boxes[j]) { boxes[j].value = ch; boxes[j].classList.add('filled'); }
+        });
+        hidden.value = Array.from(boxes).map(b => b.value).join('');
+        const next = Math.min(paste.length, boxes.length - 1);
+        boxes[next].focus();
+    });
+});
+
+// Countdown timer
+let seconds = 600;
+const countdownEl = document.getElementById('countdown');
+const resendBtn = document.getElementById('resendBtn');
+resendBtn.disabled = true;
+resendBtn.style.opacity = '.5';
+
+const timer = setInterval(() => {
+    seconds--;
+    const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+    const s = (seconds % 60).toString().padStart(2,'0');
+    countdownEl.textContent = `${m}:${s}`;
+    if (seconds <= 0) {
+        clearInterval(timer);
+        countdownEl.textContent = 'Expired';
+        countdownEl.style.color = '#ff6b8a';
+        resendBtn.disabled = false;
+        resendBtn.style.opacity = '1';
+    }
+}, 1000);
+
+// Enable resend after 30s
+setTimeout(() => {
+    resendBtn.disabled = false;
+    resendBtn.style.opacity = '1';
+}, 30000);
+
+// Focus first box
+boxes[0]?.focus();
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Reviews — Admin{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">User Reviews</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage and moderate customer reviews</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'admin_panel:store_review_list' %}" class="btn btn-sm {% if 'store' in request.path %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            <i class="bi bi-shop me-1"></i>Store Reviews
+        </a>
+        <a href="{% url 'admin_panel:product_review_list' %}" class="btn btn-sm {% if 'product' in request.path %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+            <i class="bi bi-box-seam me-1"></i>Product Reviews
+        </a>
+        <a href="{% url 'admin_panel:review_report_list' %}" class="btn btn-sm btn-outline-secondary" style="color:#ff6b8a;border-color:rgba(255,65,108,.3);">
+            <i class="bi bi-flag me-1"></i>Reports
+        </a>
+    </div>
+</div>
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">User</th>
+                    <th>Target</th>
+                    <th>Rating</th>
+                    <th>Review</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in reviews %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-semibold" style="color:var(--adm-text);">{{ r.user.username }}</div>
+                        <div class="small" style="color:var(--adm-muted);">{{ r.user.email }}</div>
+                    </td>
+                    <td>
+                        {% if r.store %}
+                        <div class="small" style="color:var(--adm-muted);">Store</div>
+                        <a href="{% url 'stores:store_detail' r.store.slug %}" target="_blank"
+                            class="small fw-semibold text-decoration-none" style="color:#00d2ff;">{{ r.store.name }}</a>
+                        {% elif r.product %}
+                        <div class="small" style="color:var(--adm-muted);">Product</div>
+                        <span class="small fw-semibold" style="color:var(--adm-text);">{{ r.product.name }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <span class="fw-bold" style="color:#ffc107;font-size:1rem;">{{ r.rating }}</span>
+                            <i class="bi bi-star-fill" style="color:#ffc107;font-size:.8rem;"></i>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small text-truncate" style="max-width:220px;color:var(--adm-text);">
+                            {% if r.title %}<strong>{{ r.title }}</strong> — {% endif %}
+                            {{ r.content|default:"—" }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if r.is_verified %}
+                        <span class="badge" style="background:rgba(56,239,125,.15);color:#38ef7d;border:1px solid rgba(56,239,125,.2);">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verified
+                        </span>
+                        {% else %}
+                        <span class="badge" style="background:rgba(255,255,255,.06);color:#64748b;border:1px solid rgba(255,255,255,.1);">
+                            Unverified
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="small" style="color:var(--adm-muted);">{{ r.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-chat-left-text fs-2 d-block mb-2"></i>
+                        No reviews found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'admin_panel/pagination.html' with page_obj=page_obj %}
+{% endblock %}

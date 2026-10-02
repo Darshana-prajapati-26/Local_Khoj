@@ -1,0 +1,64 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Review Reports</h2>
+    <div class="btn-group">
+        <a href="{% url 'admin_panel:store_review_list' %}" class="btn btn-sm btn-outline-primary">Store Reviews</a>
+        <a href="{% url 'admin_panel:product_review_list' %}" class="btn btn-sm btn-outline-primary">Product Reviews</a>
+        <a href="{% url 'admin_panel:review_report_list' %}" class="btn btn-sm btn-danger">Review Reports</a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Reporter</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Review Content</th>
+                    <th>Target</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-bold text-dark small">{{ report.user.username }}</div>
+                    </td>
+                    <td><span class="badge bg-light text-dark border px-2 py-1 text-capitalize small">{{ report.reason }}</span></td>
+                    <td>
+                        {% if report.is_resolved %}
+                        <span class="badge bg-success-subtle text-success px-2 py-1 small">Resolved</span>
+                        {% else %}
+                        <span class="badge bg-danger-subtle text-danger px-2 py-1 small">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="small text-muted text-truncate" style="max-width: 250px;">
+                            {% if report.store_review %}
+                                {{ report.store_review.comment }}
+                            {% elif report.product_review %}
+                                {{ report.product_review.comment }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if report.store_review %}
+                            <span class="small text-muted">Store:</span> <span class="small fw-semibold">{{ report.store_review.store.name }}</span>
+                        {% elif report.product_review %}
+                            <span class="small text-muted">Product:</span> <span class="small fw-semibold">{{ report.product_review.product.name }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="small text-muted">{{ report.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-5 text-muted">No reports found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}{{ service.name }} — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:1000px;">
+
+    <!-- Back -->
+    <a href="{% url 'stores:store_detail' service.store.slug %}" class="btn btn-sm mb-4"
+        style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:9px;">
+        <i class="bi bi-arrow-left me-1"></i>Back to {{ service.store.name }}
+    </a>
+
+    <div class="row g-4">
+
+        <!-- Image -->
+        <div class="col-md-5">
+            <div class="card" style="border:1px solid var(--lk-card-border);overflow:hidden;border-radius:16px;">
+                {% if service.image %}
+                <img src="{{ service.image.url }}" alt="{{ service.name }}"
+                    style="width:100%;aspect-ratio:1/1;object-fit:cover;">
+                {% else %}
+                <div style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:rgba(0,210,255,.05);">
+                    <i class="bi bi-gear-fill" style="font-size:4rem;color:rgba(0,210,255,.25);"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="col-md-7">
+            <div class="mb-2">
+                {% if service.category %}
+                <span class="badge" style="background:rgba(58,123,213,.1);color:#3a7bd5;border:1px solid rgba(58,123,213,.2);font-size:.75rem;">
+                    {{ service.category.name }}
+                </span>
+                {% endif %}
+            </div>
+
+            <h2 class="fw-bold mb-2" style="color:var(--lk-body-fg);">{{ service.name }}</h2>
+
+            <!-- Price & Duration -->
+            <div class="d-flex align-items-center gap-3 mb-3 flex-wrap">
+                <span class="fw-bold" style="font-size:1.6rem;color:#38ef7d;">₹{{ service.price }}</span>
+                <span class="d-flex align-items-center gap-1 px-3 py-1 rounded-pill"
+                    style="background:rgba(0,210,255,.08);border:1px solid rgba(0,210,255,.15);color:#00d2ff;font-size:.85rem;">
+                    <i class="bi bi-clock me-1"></i>{{ service.duration_minutes }} min
+                </span>
+            </div>
+
+            <!-- Description -->
+            {% if service.description %}
+            <p style="color:var(--lk-muted);line-height:1.7;margin-bottom:1.5rem;">{{ service.description }}</p>
+            {% endif %}
+
+            <!-- Store info -->
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background:rgba(255,255,255,.03);border:1px solid var(--lk-card-border);">
+                {% if service.store.logo %}
+                <img src="{{ service.store.logo.url }}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;" alt="">
+                {% else %}
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-shop" style="color:#00d2ff;"></i>
+                </div>
+                {% endif %}
+                <div>
+                    <a href="{% url 'stores:store_detail' service.store.slug %}" class="fw-semibold text-decoration-none" style="color:var(--lk-body-fg);">{{ service.store.name }}</a>
+                    {% if service.store.area %}
+                    <div class="small" style="color:var(--lk-muted);"><i class="bi bi-geo-alt-fill me-1" style="color:#00d2ff;"></i>{{ service.store.area.name }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Book -->
+            <form method="post" action="{% url 'add_to_cart' 'service' service.id %}">
+                {% csrf_token %}
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="input-group" style="max-width:130px;">
+                        <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:#94a3b8;border-radius:8px 0 0 8px;" onclick="this.parentNode.querySelector('input').stepDown()">−</button>
+                        <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="10" style="border-left:none;border-right:none;border-radius:0;">
+                        <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:#94a3b8;border-radius:0 8px 8px 0;" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-calendar-check me-2"></i>Book Service
+                    </button>
+                </div>
+            </form>
+
+            <!-- Contact store -->
+            <div class="d-flex gap-2 mt-3">
+                {% if service.store.phone %}
+                <a href="tel:{{ service.store.phone }}" class="btn btn-sm"
+                    style="background:rgba(56,239,125,.1);border:1px solid rgba(56,239,125,.2);color:#38ef7d;border-radius:9px;">
+                    <i class="bi bi-telephone-fill me-1"></i>Call Store
+                </a>
+                {% endif %}
+                {% if service.store.whatsapp_number %}
+                <a href="https://wa.me/91{{ service.store.whatsapp_number }}" target="_blank" class="btn btn-sm"
+                    style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.2);color:#25d366;border-radius:9px;">
+                    <i class="bi bi-whatsapp me-1"></i>WhatsApp
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

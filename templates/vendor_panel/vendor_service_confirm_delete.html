@@ -1,0 +1,38 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Delete Service{% endblock %}
+
+{% block vendor_content %}
+<div style="max-width:480px;">
+    <div class="card p-4" style="border:1px solid rgba(255,65,108,.2);">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,65,108,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="bi bi-trash3-fill" style="color:#ff6b8a;font-size:1.1rem;"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Delete Service</h5>
+                <p class="small mb-0" style="color:var(--lk-muted);">This action cannot be undone</p>
+            </div>
+        </div>
+
+        <div class="p-3 rounded-3 mb-4" style="background:rgba(255,65,108,.06);border:1px solid rgba(255,65,108,.15);">
+            <p class="mb-0" style="color:var(--lk-body-fg);">
+                Are you sure you want to delete <strong>{{ service.name }}</strong>?
+                This will permanently remove the service from your store.
+            </p>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="bi bi-trash3 me-2"></i>Yes, Delete
+                </button>
+                <a href="{% url 'vendor:services' %}" class="btn btn-sm px-4"
+                    style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:10px;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

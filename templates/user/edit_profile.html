@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Profile — Local Khoj{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Force all form inputs to use theme variables — overrides Bootstrap white */
+.ep-form input,
+.ep-form select,
+.ep-form textarea {
+    background: var(--lk-input-bg) !important;
+    border: 1.5px solid var(--lk-input-border) !important;
+    color: var(--lk-body-fg) !important;
+    border-radius: 10px !important;
+    padding: .65rem 1rem !important;
+    font-size: .92rem !important;
+    transition: border-color .2s, box-shadow .2s !important;
+    width: 100%;
+    font-family: inherit;
+}
+.ep-form input:focus,
+.ep-form select:focus,
+.ep-form textarea:focus {
+    border-color: #00d2ff !important;
+    box-shadow: 0 0 0 3px rgba(0,210,255,.15) !important;
+    outline: none !important;
+    background: var(--lk-input-bg) !important;
+    color: var(--lk-body-fg) !important;
+}
+.ep-form input::placeholder,
+.ep-form textarea::placeholder { color: var(--lk-muted) !important; }
+.ep-form input[type="file"] {
+    padding: .5rem .75rem !important;
+    cursor: pointer;
+}
+.ep-form textarea { resize: vertical; min-height: 90px; }
+
+/* Section card */
+.ep-section {
+    background: var(--lk-card-bg);
+    border: 1px solid var(--lk-card-border);
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    backdrop-filter: blur(12px);
+}
+html:not(.dark) .ep-section { background: #fff; box-shadow: 0 2px 16px rgba(0,0,0,.06); }
+
+.ep-section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .88rem; font-weight: 700; color: var(--lk-body-fg);
+    margin-bottom: 1.25rem; padding-bottom: .75rem;
+    border-bottom: 1px solid var(--lk-card-border);
+    text-transform: uppercase; letter-spacing: .05em;
+}
+.ep-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0;
+}
+
+.ep-label {
+    display: block;
+    font-size: .75rem; font-weight: 700;
+    color: var(--lk-muted);
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: .4rem;
+}
+.ep-error { color: #ff6b8a; font-size: .78rem; margin-top: .3rem; display: flex; align-items: center; gap: 4px; }
+
+/* Avatar upload */
+.ep-avatar-wrap {
+    position: relative; display: inline-block;
+}
+.ep-avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(0,210,255,.3);
+}
+.ep-avatar-placeholder {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: linear-gradient(135deg,#00d2ff,#3a7bd5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; color: #fff; font-weight: 700;
+    border: 3px solid rgba(0,210,255,.3);
+}
+.ep-avatar-btn {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #00d2ff; border: 2px solid var(--lk-card-bg);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .2s;
+}
+.ep-avatar-btn:hover { background: #3a7bd5; }
+.ep-avatar-btn i { color: #fff; font-size: .75rem; }
+/* Hide the actual file input but keep it clickable */
+.ep-avatar-file { position: absolute; inset: 0; opacity: 0; cursor: pointer; border-radius: 50%; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:760px;">
+
+    <!-- Page Header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'user:profile' %}" class="btn btn-sm"
+            style="background:rgba(128,128,128,.1);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:9px;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Account</p>
+            <h4 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Edit Profile</h4>
+        </div>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>{{ form.non_field_errors|join:', ' }}</span>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" novalidate class="ep-form">
+        {% csrf_token %}
+
+        <!-- ── Avatar + Name row ── -->
+        <div class="ep-section">
+            <div class="ep-section-title">
+                <div class="ep-icon" style="background:rgba(0,210,255,.1);color:#00d2ff;"><i class="bi bi-person-circle"></i></div>
+                Profile Photo & Name
+            </div>
+
+            <div class="d-flex flex-wrap align-items-start gap-4">
+                <!-- Avatar -->
+                <div class="ep-avatar-wrap flex-shrink-0">
+                    {% if request.user.profile_image %}
+                    <img src="{{ request.user.profile_image.url }}" class="ep-avatar" id="avatarPreview" alt="Profile">
+                    {% else %}
+                    <div class="ep-avatar-placeholder" id="avatarPlaceholder">
+                        {{ request.user.username|first|upper }}
+                    </div>
+                    <img id="avatarPreview" class="ep-avatar" style="display:none;" alt="">
+                    {% endif %}
+                    <label class="ep-avatar-btn" title="Change photo">
+                        <i class="bi bi-camera-fill"></i>
+                        {{ form.profile_image }}
+                    </label>
+                </div>
+
+                <!-- Name fields -->
+                <div class="flex-grow-1">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="ep-label">First Name</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.first_name.errors|join:', ' }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="ep-label">Last Name</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.last_name.errors|join:', ' }}</div>{% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="ep-label">Bio</label>
+                            {{ form.bio }}
+                            {% if form.bio.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.bio.errors|join:', ' }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Contact ── -->
+        <div class="ep-section">
+            <div class="ep-section-title">
+                <div class="ep-icon" style="background:rgba(56,239,125,.1);color:#38ef7d;"><i class="bi bi-envelope"></i></div>
+                Contact Details
+            </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="ep-label">Email Address</label>
+                    <div style="position:relative;">
+                        <i class="bi bi-envelope" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--lk-muted);font-size:.85rem;pointer-events:none;"></i>
+                        <div style="padding-left:2.2rem;">{{ form.email }}</div>
+                    </div>
+                    {% if form.email.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.email.errors|join:', ' }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="ep-label">Phone Number</label>
+                    <div style="position:relative;">
+                        <i class="bi bi-telephone" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--lk-muted);font-size:.85rem;pointer-events:none;"></i>
+                        <div style="padding-left:2.2rem;">{{ form.phone }}</div>
+                    </div>
+                    {% if form.phone.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.phone.errors|join:', ' }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Address ── -->
+        <div class="ep-section">
+            <div class="ep-section-title">
+                <div class="ep-icon" style="background:rgba(255,210,0,.1);color:#ffd200;"><i class="bi bi-geo-alt"></i></div>
+                Address Information
+            </div>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="ep-label">Street Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.address.errors|join:', ' }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">City</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.city.errors|join:', ' }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">State</label>
+                    {{ form.state }}
+                    {% if form.state.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.state.errors|join:', ' }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="ep-label">Pincode</label>
+                    {{ form.pincode }}
+                    {% if form.pincode.errors %}<div class="ep-error"><i class="bi bi-exclamation-circle"></i>{{ form.pincode.errors|join:', ' }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Actions ── -->
+        <div class="d-flex gap-3 justify-content-end">
+            <a href="{% url 'user:profile' %}" class="btn px-4"
+                style="background:rgba(128,128,128,.1);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:10px;">
+                Cancel
+            </a>
+            <button type="submit" class="btn btn-primary px-5">
+                <i class="bi bi-check-circle me-2"></i>Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Avatar live preview
+const avatarInput = document.querySelector('input[name="profile_image"]');
+if (avatarInput) {
+    avatarInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                if (placeholder) placeholder.style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+}
+
+// Add icon padding to email/phone inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.querySelector('input[name="email"]');
+    const phoneInput = document.querySelector('input[name="phone"]');
+    if (emailInput) emailInput.style.paddingLeft = '2.2rem';
+    if (phoneInput) phoneInput.style.paddingLeft = '2.2rem';
+});
+</script>
+{% endblock %}

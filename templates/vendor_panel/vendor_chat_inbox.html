@@ -1,0 +1,69 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Customer Messages{% endblock %}
+{% block vendor_breadcrumb %}<li class="breadcrumb-item active" style="color:#64748b;">Messages</li>{% endblock %}
+
+{% block vendor_content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Store</p>
+        <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Customer Messages</h5>
+    </div>
+    <span class="badge px-3 py-2" style="background:rgba(0,210,255,.1);color:#00d2ff;border:1px solid rgba(0,210,255,.2);border-radius:20px;">
+        {{ threads|length }} conversation{{ threads|length|pluralize }}
+    </span>
+</div>
+
+{% if threads %}
+<div class="d-flex flex-column gap-2">
+    {% for thread in threads %}
+    <a href="{% url 'chat_open_by_id' thread.id %}" class="text-decoration-none">
+        <div class="card p-3 card-hover" style="border:1px solid var(--lk-card-border);transition:all .2s;">
+            <div class="d-flex align-items-center gap-3">
+                <!-- Customer avatar -->
+                <div style="width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#00d2ff,#3a7bd5);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.1rem;border:2px solid rgba(0,210,255,.2);">
+                    {% if thread.user.profile_image %}
+                    <img src="{{ thread.user.profile_image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                    {% else %}
+                    {{ thread.user.username|first|upper }}
+                    {% endif %}
+                </div>
+                <!-- Thread info -->
+                <div class="flex-grow-1 min-width-0">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <div class="fw-bold text-truncate" style="color:var(--lk-body-fg);">
+                            {{ thread.user.get_full_name|default:thread.user.username }}
+                            <span class="small fw-normal" style="color:var(--lk-muted);">@{{ thread.user.username }}</span>
+                        </div>
+                        <span class="small flex-shrink-0" style="color:var(--lk-muted);font-size:.72rem;">
+                            {% if thread.last_message_at %}{{ thread.last_message_at|timesince }} ago{% endif %}
+                        </span>
+                    </div>
+                    <div class="small text-truncate mt-1" style="color:var(--lk-muted);">
+                        {% if thread.last_message %}
+                        {{ thread.last_message|truncatechars:70 }}
+                        {% else %}
+                        <span style="font-style:italic;">No messages yet</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Unread indicator -->
+                {% if not thread.vendor_read %}
+                <div style="width:10px;height:10px;border-radius:50%;background:#00d2ff;box-shadow:0 0 6px rgba(0,210,255,.6);flex-shrink:0;"></div>
+                {% else %}
+                <i class="bi bi-chevron-right flex-shrink-0" style="color:var(--lk-muted);font-size:.8rem;"></i>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card p-5 text-center" style="border:1px solid var(--lk-card-border);">
+    <div style="width:72px;height:72px;border-radius:20px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+        <i class="bi bi-chat-dots" style="font-size:1.8rem;color:#00d2ff;"></i>
+    </div>
+    <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">No messages yet</h5>
+    <p style="color:var(--lk-muted);">Customer conversations will appear here.</p>
+</div>
+{% endif %}
+{% endblock %}

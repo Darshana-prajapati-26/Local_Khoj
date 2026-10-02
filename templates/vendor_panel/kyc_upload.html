@@ -1,0 +1,13 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_content %}
+<div class="container py-4">
+  <h4>KYC Upload</h4>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <input type="file" name="document" class="form-control" required>
+    </div>
+    <button class="btn btn-primary">Upload</button>
+  </form>
+</div>
+{% endblock %}

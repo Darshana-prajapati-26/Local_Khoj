@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <p class="text-uppercase fw-bold mb-1" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">My Account</p>
+            <h3 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Dashboard</h3>
+        </div>
+        <a href="{% url 'user:profile' %}" class="btn btn-sm px-4"
+            style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:10px;">
+            <i class="bi bi-person-circle me-2"></i>Edit Profile
+        </a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-3 mb-5">
+        {% for icon, clr, label, val in kpi_data|default:"" %}{% endfor %}
+        <div class="col-6 col-md-3">
+            <div class="card p-4 h-100" style="border:1px solid rgba(0,210,255,.12);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,210,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-bag-check" style="color:#00d2ff;font-size:1.2rem;"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ orders|length }}</div>
+                        <div class="small" style="color:var(--lk-muted);">Orders</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card p-4 h-100" style="border:1px solid rgba(58,123,213,.12);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(58,123,213,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-bag2" style="color:#3a7bd5;font-size:1.2rem;"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{% if cart %}{{ cart.items.count }}{% else %}0{% endif %}</div>
+                        <div class="small" style="color:var(--lk-muted);">Cart Items</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card p-4 h-100" style="border:1px solid rgba(255,65,108,.12);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,65,108,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-heart" style="color:#ff6b8a;font-size:1.2rem;"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ favorites_count }}</div>
+                        <div class="small" style="color:var(--lk-muted);">Favorites</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card p-4 h-100" style="border:1px solid rgba(255,210,0,.12);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,210,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-bookmark-star" style="color:#ffd200;font-size:1.2rem;"></i>
+                    </div>
+                    <div>
+                        <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ wishlist_count }}</div>
+                        <div class="small" style="color:var(--lk-muted);">Wishlist</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+
+            <!-- Recent Orders -->
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-bag-check me-2" style="color:#00d2ff;"></i>Recent Orders</span>
+                    <a href="{% url 'order_history' %}" class="small text-decoration-none" style="color:#00d2ff;">View all</a>
+                </div>
+                <div class="card-body p-0">
+                    {% for o in orders %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                        style="border-bottom:1px solid var(--lk-card-border);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:36px;height:36px;border-radius:9px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-receipt" style="color:#00d2ff;font-size:.9rem;"></i>
+                            </div>
+                            <div>
+                                <div class="fw-semibold" style="color:var(--lk-body-fg);font-size:.88rem;">#{{ o.id }}</div>
+                                <div class="small" style="color:var(--lk-muted);">{{ o.created_at|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge text-capitalize"
+                                style="{% if o.status == 'delivered' %}background:rgba(56,239,125,.15);color:#38ef7d;{% elif o.status == 'pending' %}background:rgba(255,210,0,.15);color:#ffd200;{% else %}background:rgba(0,210,255,.12);color:#00d2ff;{% endif %}">
+                                {{ o.status }}
+                            </span>
+                            <a href="{% url 'order_detail' o.id %}" class="fw-bold text-decoration-none" style="color:var(--lk-body-fg);">₹{{ o.total_amount }}</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5" style="color:var(--lk-muted);">
+                        <i class="bi bi-bag-x fs-2 d-block mb-2"></i>No orders yet
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-activity me-2" style="color:#3a7bd5;"></i>Recent Activity
+                </div>
+                <div class="card-body p-0">
+                    {% for i in interactions %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                        style="border-bottom:1px solid var(--lk-card-border);">
+                        <span class="text-capitalize small fw-medium" style="color:var(--lk-body-fg);">{{ i.interaction_type }}</span>
+                        <span class="small" style="color:var(--lk-muted);">{{ i.created_at|date:"M d" }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5" style="color:var(--lk-muted);">
+                        <i class="bi bi-clock-history fs-2 d-block mb-2"></i>No activity yet
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+
+            <!-- Cart -->
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-bag2 me-2" style="color:#3a7bd5;"></i>Your Cart</span>
+                    {% if cart and cart.items.all %}
+                    <a href="{% url 'cart_view' %}" class="small text-decoration-none" style="color:#00d2ff;">View Cart</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if cart and cart.items.all %}
+                    {% for it in cart.items.all %}
+                    <div class="d-flex align-items-center justify-content-between py-2"
+                        style="border-bottom:1px solid var(--lk-card-border);">
+                        <span class="small fw-medium" style="color:var(--lk-body-fg);">{% firstof it.product.name it.service.name "-" %}</span>
+                        <span class="badge" style="background:rgba(0,210,255,.1);color:#00d2ff;">Qty {{ it.quantity }}</span>
+                    </div>
+                    {% endfor %}
+                    <div class="d-flex align-items-center justify-content-between mt-3 pt-2">
+                        <span class="fw-bold" style="color:var(--lk-body-fg);">Total</span>
+                        <span class="fw-bold" style="color:#00d2ff;font-size:1.1rem;">₹{{ cart.get_total }}</span>
+                    </div>
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{% url 'cart_view' %}" class="btn btn-sm flex-grow-1"
+                            style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;">View Cart</a>
+                        <a href="{% url 'checkout' %}" class="btn btn-success btn-sm flex-grow-1">Checkout</a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4" style="color:var(--lk-muted);">
+                        <i class="bi bi-bag fs-2 d-block mb-2"></i>Your cart is empty
+                        <div class="mt-2">
+                            <a href="{% url 'stores:store_list' %}" class="btn btn-sm"
+                                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;">Browse Stores</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Searches -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-search me-2" style="color:#ffd200;"></i>Recent Searches
+                </div>
+                <div class="card-body p-0">
+                    {% for s in searches %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                        style="border-bottom:1px solid var(--lk-card-border);">
+                        <a href="{% url 'search' %}?q={{ s.query }}" class="small fw-medium text-decoration-none"
+                            style="color:var(--lk-body-fg);">
+                            <i class="bi bi-search me-2" style="color:var(--lk-muted);font-size:.75rem;"></i>{{ s.query }}
+                        </a>
+                        <span class="badge"
+                            style="background:var(--lk-surface-1);color:var(--lk-muted);border:1px solid var(--lk-card-border);font-size:.7rem;">
+                            {{ s.search_type }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5" style="color:var(--lk-muted);">
+                        <i class="bi bi-search fs-2 d-block mb-2"></i>No searches yet
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Orders{% endblock %}
+{% block vendor_breadcrumb %}<li class="breadcrumb-item active" style="color:#64748b;">Orders</li>{% endblock %}
+
+{% block vendor_content %}
+
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Manage</p>
+        <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Customer Orders</h5>
+    </div>
+    <span class="badge px-3 py-2" style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;font-size:.82rem;">
+        {{ rows|length }} Total
+    </span>
+</div>
+
+<!-- Status Tabs -->
+<div class="d-flex flex-wrap gap-2 mb-4" id="orderTabs">
+
+    {% with all_count=rows|length %}
+    <button onclick="switchTab('all')" id="tab-all" data-tab="all"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(0,210,255,.12);color:#00d2ff;border:1px solid rgba(0,210,255,.3);">
+        <i class="bi bi-list-ul me-1"></i>All
+        <span class="ms-1 badge" style="background:rgba(0,210,255,.2);color:#00d2ff;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ all_count }}</span>
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.pending|length %}
+    <button onclick="switchTab('pending')" id="tab-pending" data-tab="pending"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-clock-fill me-1" style="color:#ffd200;"></i>Pending
+        {% if cnt %}<span class="ms-1 badge" style="background:#ffd200;color:#000;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.confirmed|length %}
+    <button onclick="switchTab('confirmed')" id="tab-confirmed" data-tab="confirmed"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-check-circle-fill me-1" style="color:#00d2ff;"></i>Confirmed
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(0,210,255,.2);color:#00d2ff;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.processing|length %}
+    <button onclick="switchTab('processing')" id="tab-processing" data-tab="processing"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-gear-fill me-1" style="color:#818cf8;"></i>Processing
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(129,140,248,.2);color:#818cf8;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.shipped|length %}
+    <button onclick="switchTab('shipped')" id="tab-shipped" data-tab="shipped"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-truck me-1" style="color:#f59e0b;"></i>Shipped
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(245,158,11,.2);color:#f59e0b;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.out_for_delivery|length %}
+    <button onclick="switchTab('out_for_delivery')" id="tab-out_for_delivery" data-tab="out_for_delivery"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-bicycle me-1" style="color:#fb923c;"></i>Out for Delivery
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(251,146,60,.2);color:#fb923c;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.delivered|length %}
+    <button onclick="switchTab('delivered')" id="tab-delivered" data-tab="delivered"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-bag-check-fill me-1" style="color:#38ef7d;"></i>Delivered
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(56,239,125,.2);color:#38ef7d;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.completed|length %}
+    <button onclick="switchTab('completed')" id="tab-completed" data-tab="completed"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-patch-check-fill me-1" style="color:#38ef7d;"></i>Completed
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(56,239,125,.2);color:#38ef7d;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+    {% with cnt=status_groups.cancelled|length %}
+    <button onclick="switchTab('cancelled')" id="tab-cancelled" data-tab="cancelled"
+        style="padding:7px 16px;border-radius:10px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+               background:rgba(255,255,255,.04);color:var(--lk-muted);border:1px solid var(--lk-card-border);">
+        <i class="bi bi-x-circle-fill me-1" style="color:#ff6b8a;"></i>Cancelled
+        {% if cnt %}<span class="ms-1 badge" style="background:rgba(255,65,108,.2);color:#ff6b8a;font-size:.68rem;border-radius:20px;padding:1px 6px;">{{ cnt }}</span>{% endif %}
+    </button>
+    {% endwith %}
+
+</div>
+
+<!-- ── ALL ── -->
+<div id="pane-all">
+    {% if rows %}
+    <div class="d-flex flex-column gap-4">{% for row in rows %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── PENDING ── -->
+<div id="pane-pending" style="display:none;">
+    {% if status_groups.pending %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.pending %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── CONFIRMED ── -->
+<div id="pane-confirmed" style="display:none;">
+    {% if status_groups.confirmed %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.confirmed %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── PROCESSING ── -->
+<div id="pane-processing" style="display:none;">
+    {% if status_groups.processing %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.processing %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── SHIPPED ── -->
+<div id="pane-shipped" style="display:none;">
+    {% if status_groups.shipped %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.shipped %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── OUT FOR DELIVERY ── -->
+<div id="pane-out_for_delivery" style="display:none;">
+    {% if status_groups.out_for_delivery %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.out_for_delivery %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── DELIVERED ── -->
+<div id="pane-delivered" style="display:none;">
+    {% if status_groups.delivered %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.delivered %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── COMPLETED ── -->
+<div id="pane-completed" style="display:none;">
+    {% if status_groups.completed %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.completed %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<!-- ── CANCELLED ── -->
+<div id="pane-cancelled" style="display:none;">
+    {% if status_groups.cancelled %}
+    <div class="d-flex flex-column gap-4">{% for row in status_groups.cancelled %}{% include "vendor_panel/_order_card.html" %}{% endfor %}</div>
+    {% else %}{% include "vendor_panel/_orders_empty.html" %}{% endif %}
+</div>
+
+<script>
+const TAB_COLORS = {
+    all:             { bg:'rgba(0,210,255,.12)',   color:'#00d2ff',  border:'rgba(0,210,255,.3)' },
+    pending:         { bg:'rgba(255,210,0,.15)',   color:'#ffd200',  border:'rgba(255,210,0,.3)' },
+    confirmed:       { bg:'rgba(0,210,255,.12)',   color:'#00d2ff',  border:'rgba(0,210,255,.3)' },
+    processing:      { bg:'rgba(129,140,248,.12)', color:'#818cf8',  border:'rgba(129,140,248,.3)' },
+    shipped:         { bg:'rgba(245,158,11,.12)',  color:'#f59e0b',  border:'rgba(245,158,11,.3)' },
+    out_for_delivery:{ bg:'rgba(251,146,60,.12)',  color:'#fb923c',  border:'rgba(251,146,60,.3)' },
+    delivered:       { bg:'rgba(56,239,125,.12)',  color:'#38ef7d',  border:'rgba(56,239,125,.3)' },
+    completed:       { bg:'rgba(56,239,125,.12)',  color:'#38ef7d',  border:'rgba(56,239,125,.3)' },
+    cancelled:       { bg:'rgba(255,65,108,.12)',  color:'#ff6b8a',  border:'rgba(255,65,108,.3)' },
+};
+
+let activeTab = 'all';
+
+function switchTab(tab) {
+    // Hide old pane, reset old button
+    document.getElementById('pane-' + activeTab).style.display = 'none';
+    const oldBtn = document.getElementById('tab-' + activeTab);
+    if (oldBtn) {
+        oldBtn.style.background   = 'rgba(255,255,255,.04)';
+        oldBtn.style.color        = 'var(--lk-muted)';
+        oldBtn.style.borderColor  = 'var(--lk-card-border)';
+    }
+    // Show new pane, highlight new button
+    document.getElementById('pane-' + tab).style.display = '';
+    const c = TAB_COLORS[tab] || TAB_COLORS.all;
+    const btn = document.getElementById('tab-' + tab);
+    if (btn) {
+        btn.style.background  = c.bg;
+        btn.style.color       = c.color;
+        btn.style.borderColor = c.border;
+    }
+    activeTab = tab;
+}
+</script>
+
+{% endblock %}

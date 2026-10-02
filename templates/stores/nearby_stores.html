@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center mb-3">
+    <h3 class="mb-0">Nearby Stores</h3>
+    <span class="badge bg-secondary ms-3">{{ page_obj.paginator.count }} results</span>
+  </div>
+
+  {% if page_obj.object_list %}
+  <div class="row g-3">
+    {% for store, distance in page_obj.object_list %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card h-100 card-hover">
+        <div class="card-body d-flex flex-column">
+          <div class="d-flex align-items-center mb-2">
+            {% if store.logo %}
+            <img src="{{ store.logo.url }}" alt="{{ store.name }}" class="me-2"
+              style="width:44px;height:44px;border-radius:8px;object-fit:cover;">
+            {% else %}
+            <div class="me-2 bg-primary" style="width:44px;height:44px;border-radius:8px;"></div>
+            {% endif %}
+            <div>
+              <a href="{% url 'stores:store_detail' store.slug %}" class="fw-semibold text-decoration-none">{{
+                store.name }}</a>
+              {% if store.is_verified %}<span class="badge bg-success ms-2">Verified</span>{% endif %}
+              <div class="small text-muted">{{ store.address|truncatewords:10 }}</div>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <span class="badge bg-secondary">{{ distance|floatformat:1 }} km away</span>
+            <div>
+              <a href="tel:{{ store.phone }}" class="btn btn-sm btn-outline-primary">Call</a>
+              <a href="{% url 'stores:store_detail' store.slug %}" class="btn btn-sm btn-primary">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <nav class="mt-4">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+      {% endif %}
+      <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages
+          }}</span></li>
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% else %}
+  <div class="alert alert-info">No nearby stores within 50 km.</div>
+  {% endif %}
+</div>
+{% endblock %}

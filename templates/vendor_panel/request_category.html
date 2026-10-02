@@ -1,0 +1,153 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Request Category{% endblock %}
+
+{% block vendor_content %}
+
+<div class="row g-4">
+
+    <!-- Request Form -->
+    <div class="col-lg-5">
+        <div class="card p-4" style="border:1px solid rgba(0,210,255,.12);">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:40px;height:40px;border-radius:11px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-tags" style="color:#00d2ff;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0" style="color:#fff;">Request New Category</h5>
+                    <p class="small mb-0" style="color:#64748b;">Submit a category for admin review</p>
+                </div>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} d-flex align-items-center gap-2 mb-3">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                {% else %}<i class="bi bi-info-circle-fill"></i>{% endif %}
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors|join:', ' }}</div>
+                {% endif %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="mt-1 small d-flex align-items-center gap-1" style="color:#ff6b8a;">
+                        <i class="bi bi-exclamation-circle"></i>{{ field.errors|join:', ' }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="p-3 rounded-3 mb-4" style="background:rgba(255,210,0,.06);border:1px solid rgba(255,210,0,.15);">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-info-circle mt-1" style="color:#ffd200;flex-shrink:0;"></i>
+                        <p class="small mb-0" style="color:#94a3b8;line-height:1.5;">
+                            Your request will be reviewed by our admin team. Once approved, the category will be available for all vendors. You'll see the status below.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-send me-2"></i>Submit Request
+                    </button>
+                    <a href="{% url 'vendor:dashboard' %}" class="btn btn-sm px-3"
+                        style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:9px;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- My Requests -->
+    <div class="col-lg-7">
+        <div class="card" style="border:1px solid rgba(255,255,255,.07);">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-clock-history me-2" style="color:#ffd200;"></i>My Category Requests</span>
+                <span class="badge" style="background:rgba(0,210,255,.1);color:#00d2ff;">{{ my_requests|length }} total</span>
+            </div>
+            <div class="card-body p-0">
+                {% for req in my_requests %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                    style="border-bottom:1px solid rgba(255,255,255,.05);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:36px;height:36px;border-radius:9px;
+                            {% if req.is_approved %}background:rgba(56,239,125,.1);{% else %}background:rgba(255,210,0,.1);{% endif %}
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            {% if req.is_approved %}
+                            <i class="bi bi-check-circle-fill" style="color:#38ef7d;font-size:.9rem;"></i>
+                            {% else %}
+                            <i class="bi bi-hourglass-split" style="color:#ffd200;font-size:.9rem;"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="color:#fff;font-size:.9rem;">{{ req.name }}</div>
+                            <div class="small" style="color:#64748b;">Submitted {{ req.created_at|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div>
+                        {% if req.is_approved %}
+                        <span class="badge d-flex align-items-center gap-1"
+                            style="background:rgba(56,239,125,.15);color:#38ef7d;border:1px solid rgba(56,239,125,.25);padding:6px 12px;border-radius:20px;">
+                            <i class="bi bi-patch-check-fill"></i> Approved
+                        </span>
+                        {% else %}
+                        <span class="badge d-flex align-items-center gap-1"
+                            style="background:rgba(255,210,0,.15);color:#ffd200;border:1px solid rgba(255,210,0,.25);padding:6px 12px;border-radius:20px;">
+                            <i class="bi bi-hourglass-split"></i> Pending Review
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5" style="color:#475569;">
+                    <i class="bi bi-tags fs-2 d-block mb-2"></i>
+                    <p class="mb-0">No category requests yet.</p>
+                    <p class="small">Submit your first request using the form.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="card mt-3 p-4" style="border:1px solid rgba(255,255,255,.07);">
+            <h6 class="fw-bold mb-3" style="color:#fff;font-size:.85rem;">
+                <i class="bi bi-question-circle me-2" style="color:#00d2ff;"></i>How it works
+            </h6>
+            <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div style="width:26px;height:26px;border-radius:50%;background:var(--lk-gradient);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:#fff;">1</div>
+                    <div>
+                        <div class="fw-semibold" style="color:#e0e6ed;font-size:.85rem;">Submit Request</div>
+                        <div class="small" style="color:#64748b;">Enter the category name and submit.</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,210,0,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:#ffd200;">2</div>
+                    <div>
+                        <div class="fw-semibold" style="color:#e0e6ed;font-size:.85rem;">Admin Reviews</div>
+                        <div class="small" style="color:#64748b;">Our team reviews within 24–48 hours. Status shows <span style="color:#ffd200;">Pending</span>.</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-start gap-3">
+                    <div style="width:26px;height:26px;border-radius:50%;background:rgba(56,239,125,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.75rem;font-weight:700;color:#38ef7d;">3</div>
+                    <div>
+                        <div class="fw-semibold" style="color:#e0e6ed;font-size:.85rem;">Approved & Live</div>
+                        <div class="small" style="color:#64748b;">Once approved, status changes to <span style="color:#38ef7d;">Approved</span> and the category is available.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

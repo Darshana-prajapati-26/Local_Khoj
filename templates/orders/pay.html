@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Complete Payment — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:560px;">
+
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div style="width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,rgba(0,210,255,.15),rgba(58,123,213,.15));border:1px solid rgba(0,210,255,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="bi bi-shield-lock-fill" style="font-size:1.8rem;color:#00d2ff;"></i>
+        </div>
+        <h3 class="fw-bold mb-1" style="color:var(--lk-body-fg);">Secure Payment</h3>
+        <p style="color:var(--lk-muted);">Complete your payment for Order #{{ order.id }}</p>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="card mb-4" style="border:1px solid var(--lk-card-border);">
+        <div class="card-header"><i class="bi bi-receipt me-2" style="color:#00d2ff;"></i>Order Summary</div>
+        <div class="card-body p-0">
+            {% for item in order.items.all %}
+            <div class="d-flex align-items-center justify-content-between px-4 py-3"
+                style="border-bottom:1px solid var(--lk-card-border);">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width:38px;height:38px;border-radius:9px;background:var(--lk-surface-1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        <i class="bi bi-{% if item.service %}gear{% else %}box-seam{% endif %}" style="color:#00d2ff;font-size:.9rem;"></i>
+                    </div>
+                    <div>
+                        <div class="small fw-semibold" style="color:var(--lk-body-fg);">
+                            {% if item.product %}{{ item.product.name|truncatechars:28 }}{% else %}{{ item.service.name|truncatechars:28 }}{% endif %}
+                        </div>
+                        <div class="small" style="color:var(--lk-muted);">Qty: {{ item.quantity }}</div>
+                    </div>
+                </div>
+                <span class="fw-semibold" style="color:var(--lk-body-fg);">₹{{ item.get_total_price }}</span>
+            </div>
+            {% endfor %}
+            <div class="d-flex justify-content-between align-items-center px-4 py-3">
+                <span class="fw-bold" style="color:var(--lk-body-fg);">Total</span>
+                <span class="fw-bold" style="color:#00d2ff;font-size:1.15rem;">₹{{ order.total_amount }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods -->
+    <div class="card p-4 mb-4" style="border:1px solid var(--lk-card-border);">
+        <h6 class="fw-bold mb-4" style="color:var(--lk-body-fg);">Choose Payment Method</h6>
+
+        <div class="d-flex flex-column gap-3">
+            {% if key_id and razorpay_order_id %}
+            <button id="rzp-btn" class="btn py-3 d-flex align-items-center gap-3"
+                style="background:rgba(0,210,255,.06);border:1.5px solid rgba(0,210,255,.2);border-radius:12px;text-align:left;transition:all .2s;"
+                onmouseover="this.style.background='rgba(0,210,255,.12)'"
+                onmouseout="this.style.background='rgba(0,210,255,.06)'">
+                <div style="width:44px;height:44px;border-radius:10px;background:rgba(0,210,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-lightning-charge-fill" style="color:#00d2ff;font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-bold" style="color:var(--lk-body-fg);">Pay with Razorpay</div>
+                    <div class="small" style="color:var(--lk-muted);">UPI, Cards, Net Banking, Wallets</div>
+                </div>
+                <i class="bi bi-arrow-right ms-auto" style="color:#00d2ff;"></i>
+            </button>
+            {% endif %}
+
+            {% if stripe_pk %}
+            <a href="{% url 'pay_stripe_create' order.id %}" class="btn py-3 d-flex align-items-center gap-3 text-decoration-none"
+                style="background:rgba(99,91,255,.06);border:1.5px solid rgba(99,91,255,.2);border-radius:12px;text-align:left;transition:all .2s;"
+                onmouseover="this.style.background='rgba(99,91,255,.12)'"
+                onmouseout="this.style.background='rgba(99,91,255,.06)'">
+                <div style="width:44px;height:44px;border-radius:10px;background:rgba(99,91,255,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-credit-card-2-front-fill" style="color:#635bff;font-size:1.2rem;"></i>
+                </div>
+                <div>
+                    <div class="fw-bold" style="color:var(--lk-body-fg);">Pay with Stripe</div>
+                    <div class="small" style="color:var(--lk-muted);">International Cards accepted</div>
+                </div>
+                <i class="bi bi-arrow-right ms-auto" style="color:#635bff;"></i>
+            </a>
+            {% endif %}
+
+            {% if not key_id and not stripe_pk %}
+            <div class="text-center py-3" style="color:var(--lk-muted);">
+                <i class="bi bi-info-circle me-2"></i>No payment gateway configured. This is a COD order.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Security note -->
+    <div class="d-flex align-items-center gap-2 justify-content-center mb-4">
+        <i class="bi bi-shield-check" style="color:#38ef7d;"></i>
+        <span class="small" style="color:var(--lk-muted);">256-bit SSL encrypted · Your payment is secure</span>
+    </div>
+
+    <a href="{% url 'order_detail' order.id %}" class="btn w-100"
+        style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:10px;">
+        <i class="bi bi-arrow-left me-2"></i>Back to Order
+    </a>
+</div>
+
+{% if key_id and razorpay_order_id %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const options = {
+    key: "{{ key_id }}",
+    amount: "{{ amount_paise }}",
+    currency: "INR",
+    name: "Local Khoj",
+    description: "Order #{{ order.id }}",
+    order_id: "{{ razorpay_order_id }}",
+    theme: { color: "#00d2ff" },
+    handler: function(response) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'pay_verify' %}";
+        [
+            ['csrfmiddlewaretoken', '{{ csrf_token }}'],
+            ['razorpay_payment_id', response.razorpay_payment_id],
+            ['razorpay_signature', response.razorpay_signature],
+            ['razorpay_order_id', response.razorpay_order_id || "{{ razorpay_order_id }}"],
+            ['order_id', '{{ order.id }}']
+        ].forEach(([name, value]) => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = name; inp.value = value;
+            form.appendChild(inp);
+        });
+        document.body.appendChild(form);
+        form.submit();
+    }
+};
+document.getElementById('rzp-btn').addEventListener('click', function(e) {
+    new Razorpay(options).open();
+    e.preventDefault();
+});
+</script>
+{% endif %}
+{% endblock %}

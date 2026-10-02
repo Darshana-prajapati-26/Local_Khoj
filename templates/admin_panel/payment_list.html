@@ -1,0 +1,59 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Payments — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">Payments</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">All payment transactions</p>
+    </div>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>User</th>
+                    <th>Order</th>
+                    <th>Amount</th>
+                    <th>Provider</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td class="ps-4 small" style="color:var(--adm-muted);">#{{ p.id }}</td>
+                    <td class="fw-semibold" style="color:var(--adm-text);">{{ p.user.username }}</td>
+                    <td>
+                        <a href="{% url 'admin_panel:order_edit' p.order.pk %}" class="small text-decoration-none" style="color:#00d2ff;">
+                            Order #{{ p.order.id }}
+                        </a>
+                    </td>
+                    <td class="fw-semibold" style="color:var(--adm-text);">₹{{ p.amount }}</td>
+                    <td class="small" style="color:var(--adm-muted);">{{ p.provider }}</td>
+                    <td>
+                        <span class="badge text-capitalize"
+                            style="{% if p.status == 'success' or p.status == 'completed' %}background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);{% elif p.status == 'pending' %}background:rgba(255,210,0,.12);color:#ffd200;border:1px solid rgba(255,210,0,.2);{% else %}background:rgba(255,65,108,.12);color:#ff6b8a;border:1px solid rgba(255,65,108,.2);{% endif %}">
+                            {{ p.status }}
+                        </span>
+                    </td>
+                    <td class="small" style="color:var(--adm-muted);">{{ p.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-credit-card fs-2 d-block mb-2"></i>No payments found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "admin_panel/pagination.html" with page_obj=page_obj %}
+{% endblock %}

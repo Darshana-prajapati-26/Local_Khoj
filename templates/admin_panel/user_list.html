@@ -1,0 +1,91 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Users — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">System Users</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage all registered accounts</p>
+    </div>
+    <a href="{% url 'admin_panel:user_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add New User
+    </a>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Username</th>
+                    <th>Email</th>
+                    <th>User Type</th>
+                    <th>Status</th>
+                    <th>Joined Date</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-semibold" style="color:var(--adm-text);">{{ user.username }}</div>
+                        <div class="small" style="color:var(--adm-muted);">ID: #{{ user.id }}</div>
+                    </td>
+                    <td style="color:var(--adm-text);">{{ user.email }}</td>
+                    <td>
+                        <span class="badge"
+                            style="{% if user.user_type == 'admin' %}background:rgba(255,65,108,.15);color:#ff6b8a;border:1px solid rgba(255,65,108,.25);{% elif user.user_type == 'vendor' %}background:rgba(0,210,255,.12);color:#00d2ff;border:1px solid rgba(0,210,255,.2);{% else %}background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);{% endif %}">
+                            {{ user.get_user_type_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_panel:user_toggle_status' user.pk %}" class="text-decoration-none">
+                            {% if user.is_active %}
+                            <span class="small fw-semibold" style="color:#38ef7d;">
+                                <i class="bi bi-circle-fill me-1" style="font-size:.45rem;"></i>Active
+                            </span>
+                            {% else %}
+                            <span class="small fw-semibold" style="color:#ff6b8a;">
+                                <i class="bi bi-circle-fill me-1" style="font-size:.45rem;"></i>Inactive
+                            </span>
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td class="small" style="color:var(--adm-muted);">{{ user.date_joined|date:"M d, Y" }}</td>
+                    <td class="text-end pe-4">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{% url 'admin_panel:user_edit' user.pk %}" class="btn btn-sm"
+                                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if user.user_type != 'admin' %}
+                            <a href="{% url 'admin_panel:user_make_admin' user.pk %}" class="btn btn-sm"
+                                style="background:rgba(255,210,0,.1);border:1px solid rgba(255,210,0,.2);color:#ffd200;border-radius:7px;"
+                                onclick="return confirm('Make this user an admin?')" title="Make Admin">
+                                <i class="bi bi-shield-lock"></i>
+                            </a>
+                            {% endif %}
+                            <a href="{% url 'admin_panel:user_delete' user.pk %}" class="btn btn-sm"
+                                style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;"
+                                onclick="return confirm('Delete this user?')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-people fs-2 d-block mb-2"></i>No users found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include "admin_panel/pagination.html" %}
+{% endblock %}

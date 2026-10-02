@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:860px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <a href="{% url 'order_history' %}" class="btn btn-sm"
+            style="background:rgba(128,128,128,.1);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:9px;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Order Details</p>
+            <h4 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Order #{{ order.id }}</h4>
+        </div>
+        <div class="ms-auto">
+            <a href="{% url 'invoice_pdf' order.id %}" class="btn btn-sm"
+                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:9px;">
+                <i class="bi bi-download me-1"></i>Invoice PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Status + Timeline -->
+    <div class="card mb-4 p-4" style="border:1px solid var(--lk-card-border);">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="fw-bold mb-0" style="color:var(--lk-body-fg);">
+                <i class="bi bi-activity me-2" style="color:#00d2ff;"></i>Order Status
+            </h6>
+            <span class="badge px-3 py-2" style="border-radius:20px;font-size:.8rem;font-weight:700;
+                {% if order.status == 'delivered' or order.status == 'completed' %}background:rgba(56,239,125,.15);color:#38ef7d;border:1px solid rgba(56,239,125,.25);
+                {% elif order.status == 'cancelled' %}background:rgba(255,65,108,.15);color:#ff6b8a;border:1px solid rgba(255,65,108,.25);
+                {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25);
+                {% elif order.status == 'processing' or order.status == 'confirmed' %}background:rgba(58,123,213,.15);color:#3a7bd5;border:1px solid rgba(58,123,213,.25);
+                {% else %}background:rgba(255,210,0,.15);color:#ffd200;border:1px solid rgba(255,210,0,.25);{% endif %}">
+                {{ order.get_status_display }}
+            </span>
+        </div>
+
+        {% if order.status == 'cancelled' %}
+        <div class="p-3 rounded-3" style="background:rgba(255,65,108,.08);border:1px solid rgba(255,65,108,.2);">
+            <i class="bi bi-x-circle-fill me-2" style="color:#ff6b8a;"></i>
+            <span style="color:#ff6b8a;font-weight:600;">This order has been cancelled.</span>
+        </div>
+        {% else %}
+
+        <!-- Progress tracker — 5 steps -->
+        {% with s=order.status %}
+        <div class="d-flex align-items-center" style="overflow-x:auto;padding-bottom:4px;">
+
+            <!-- Step helper: is_done = step already passed, is_active = current step -->
+            {% comment %}Steps: pending → confirmed → processing → shipped → delivered{% endcomment %}
+
+            <!-- 1. Ordered (always done unless cancelled) -->
+            {% with done1=True %}
+            <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:64px;">
+                <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(56,239,125,.15);border:2px solid #38ef7d;">
+                    <i class="bi bi-bag-check" style="color:#38ef7d;font-size:.9rem;"></i>
+                </div>
+                <div class="small mt-1 text-center" style="color:var(--lk-muted);font-size:.68rem;white-space:nowrap;">Ordered</div>
+            </div>
+            {% endwith %}
+
+            <!-- Connector 1→2 -->
+            <div style="flex:1;height:2px;min-width:24px;
+                {% if s == 'confirmed' or s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:#38ef7d;{% else %}background:var(--lk-card-border);{% endif %}"></div>
+
+            <!-- 2. Confirmed -->
+            <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:64px;">
+                <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    {% if s == 'confirmed' or s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:rgba(56,239,125,.15);border:2px solid #38ef7d;{% else %}background:var(--lk-surface-1);border:2px solid var(--lk-card-border);{% endif %}">
+                    <i class="bi bi-check2-circle" style="font-size:.9rem;
+                        {% if s == 'confirmed' or s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}color:#38ef7d;{% else %}color:var(--lk-muted);{% endif %}"></i>
+                </div>
+                <div class="small mt-1 text-center" style="color:var(--lk-muted);font-size:.68rem;white-space:nowrap;">Confirmed</div>
+            </div>
+
+            <!-- Connector 2→3 -->
+            <div style="flex:1;height:2px;min-width:24px;
+                {% if s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:#38ef7d;{% else %}background:var(--lk-card-border);{% endif %}"></div>
+
+            <!-- 3. Processing -->
+            <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:64px;">
+                <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    {% if s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:rgba(56,239,125,.15);border:2px solid #38ef7d;{% else %}background:var(--lk-surface-1);border:2px solid var(--lk-card-border);{% endif %}">
+                    <i class="bi bi-gear-fill" style="font-size:.9rem;
+                        {% if s == 'processing' or s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}color:#38ef7d;{% else %}color:var(--lk-muted);{% endif %}"></i>
+                </div>
+                <div class="small mt-1 text-center" style="color:var(--lk-muted);font-size:.68rem;white-space:nowrap;">Processing</div>
+            </div>
+
+            <!-- Connector 3→4 -->
+            <div style="flex:1;height:2px;min-width:24px;
+                {% if s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:#38ef7d;{% else %}background:var(--lk-card-border);{% endif %}"></div>
+
+            <!-- 4. Shipped -->
+            <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:64px;">
+                <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    {% if s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}background:rgba(56,239,125,.15);border:2px solid #38ef7d;{% else %}background:var(--lk-surface-1);border:2px solid var(--lk-card-border);{% endif %}">
+                    <i class="bi bi-truck" style="font-size:.9rem;
+                        {% if s == 'shipped' or s == 'out_for_delivery' or s == 'delivered' or s == 'completed' %}color:#38ef7d;{% else %}color:var(--lk-muted);{% endif %}"></i>
+                </div>
+                <div class="small mt-1 text-center" style="color:var(--lk-muted);font-size:.68rem;white-space:nowrap;">Shipped</div>
+            </div>
+
+            <!-- Connector 4→5 -->
+            <div style="flex:1;height:2px;min-width:24px;
+                {% if s == 'delivered' or s == 'completed' %}background:#38ef7d;{% else %}background:var(--lk-card-border);{% endif %}"></div>
+
+            <!-- 5. Delivered -->
+            <div class="d-flex flex-column align-items-center flex-shrink-0" style="min-width:64px;">
+                <div style="width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    {% if s == 'delivered' or s == 'completed' %}background:rgba(56,239,125,.15);border:2px solid #38ef7d;{% else %}background:var(--lk-surface-1);border:2px solid var(--lk-card-border);{% endif %}">
+                    <i class="bi bi-check-circle-fill" style="font-size:.9rem;
+                        {% if s == 'delivered' or s == 'completed' %}color:#38ef7d;{% else %}color:var(--lk-muted);{% endif %}"></i>
+                </div>
+                <div class="small mt-1 text-center" style="color:var(--lk-muted);font-size:.68rem;white-space:nowrap;">Delivered</div>
+            </div>
+
+        </div>
+        {% endwith %}
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Left: Items -->
+        <div class="col-lg-7">
+            <div class="card" style="border:1px solid var(--lk-card-border);">
+                <div class="card-header">
+                    <i class="bi bi-box-seam me-2" style="color:#00d2ff;"></i>Order Items
+                    <span class="badge ms-2" style="background:rgba(0,210,255,.1);color:#00d2ff;">{{ order.items.count }}</span>
+                </div>
+                <div class="card-body p-0">
+                    {% for item in order.items.all %}
+                    <div class="d-flex align-items-center gap-3 px-4 py-3"
+                        style="border-bottom:1px solid var(--lk-card-border);">
+                        <div style="width:52px;height:52px;border-radius:10px;overflow:hidden;background:var(--lk-surface-1);flex-shrink:0;">
+                            {% if item.product and item.product.image %}
+                            <img src="{{ item.product.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                            {% else %}
+                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                                <i class="bi bi-{% if item.service %}gear{% else %}box-seam{% endif %}" style="color:#00d2ff;font-size:1.2rem;"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="fw-semibold text-truncate" style="color:var(--lk-body-fg);">
+                                {% if item.product %}{{ item.product.name }}{% else %}{{ item.service.name }}{% endif %}
+                            </div>
+                            <div class="small" style="color:var(--lk-muted);">
+                                {% if item.product and item.product.store %}{{ item.product.store.name }}
+                                {% elif item.service and item.service.store %}{{ item.service.store.name }}{% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                            <div class="small" style="color:var(--lk-muted);">{{ item.quantity }} × ₹{{ item.price }}</div>
+                            <div class="fw-bold" style="color:var(--lk-body-fg);">₹{{ item.get_total_price }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="px-4 py-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold" style="color:var(--lk-body-fg);">Order Total</span>
+                        <span class="fw-bold" style="color:#00d2ff;font-size:1.2rem;">₹{{ order.total_amount }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Info cards -->
+        <div class="col-lg-5 d-flex flex-column gap-4">
+
+            <!-- Delivery -->
+            <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+                <h6 class="fw-bold mb-3" style="color:var(--lk-body-fg);">
+                    <i class="bi bi-geo-alt-fill me-2" style="color:#00d2ff;"></i>Delivery Details
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-person-fill mt-1" style="color:var(--lk-muted);font-size:.85rem;flex-shrink:0;"></i>
+                        <span style="color:var(--lk-body-fg);">{{ order.delivery_name|default:"—" }}</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-telephone-fill mt-1" style="color:var(--lk-muted);font-size:.85rem;flex-shrink:0;"></i>
+                        <span style="color:var(--lk-body-fg);">{{ order.delivery_phone|default:"—" }}</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-house-fill mt-1" style="color:var(--lk-muted);font-size:.85rem;flex-shrink:0;"></i>
+                        <span style="color:var(--lk-body-fg);">{{ order.delivery_address|default:"—" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment -->
+            <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+                <h6 class="fw-bold mb-3" style="color:var(--lk-body-fg);">
+                    <i class="bi bi-credit-card-fill me-2" style="color:#00d2ff;"></i>Payment
+                </h6>
+                {% if payment %}
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Method</span>
+                        <span class="fw-semibold text-capitalize" style="color:var(--lk-body-fg);">{{ payment.provider }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Status</span>
+                        <span class="badge"
+                            style="{% if payment.status == 'completed' or payment.status == 'success' %}background:rgba(56,239,125,.15);color:#38ef7d;{% elif payment.status == 'failed' %}background:rgba(255,65,108,.15);color:#ff6b8a;{% else %}background:rgba(255,210,0,.15);color:#ffd200;{% endif %}">
+                            {{ payment.status|title }}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Amount</span>
+                        <span class="fw-bold" style="color:var(--lk-body-fg);">₹{{ payment.amount }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="small mb-0" style="color:var(--lk-muted);">No payment record found.</p>
+                {% endif %}
+                {% if order.status != 'cancelled' %}
+                {% if not payment or payment.status == 'pending' or payment.status == 'failed' %}
+                <a href="{% url 'pay_order' order.id %}" class="btn btn-primary w-100 mt-3">
+                    <i class="bi bi-credit-card me-2"></i>Pay Now
+                </a>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Order Meta -->
+            <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+                <h6 class="fw-bold mb-3" style="color:var(--lk-body-fg);">
+                    <i class="bi bi-info-circle-fill me-2" style="color:#00d2ff;"></i>Order Info
+                </h6>
+                <div class="d-flex flex-column gap-2">
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Order ID</span>
+                        <span class="fw-semibold" style="color:var(--lk-body-fg);">#{{ order.id }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Placed on</span>
+                        <span style="color:var(--lk-body-fg);">{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Type</span>
+                        <span style="color:var(--lk-body-fg);">{% if order.is_service_order %}Service{% else %}Product{% endif %}</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--lk-muted);">Items</span>
+                        <span style="color:var(--lk-body-fg);">{{ order.items.count }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

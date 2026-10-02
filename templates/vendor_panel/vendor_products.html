@@ -1,0 +1,121 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Products{% endblock %}
+
+{% block vendor_content %}
+
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Catalog</p>
+        <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">My Products</h5>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'vendor:product_bulk_upload' %}" class="btn btn-sm"
+            style="background:rgba(0,210,255,.08);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:9px;">
+            <i class="bi bi-upload me-1"></i>Bulk Upload
+        </a>
+        <a href="{% url 'vendor:product_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i>Add Product
+        </a>
+    </div>
+</div>
+
+{% if products %}
+<div class="card" style="border:1px solid var(--lk-card-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:44px;height:44px;border-radius:10px;overflow:hidden;background:var(--lk-surface-1);flex-shrink:0;">
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                                {% else %}
+                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                                    <i class="bi bi-box-seam" style="color:#00d2ff;font-size:1rem;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-semibold" style="color:var(--lk-body-fg);font-size:.9rem;">{{ product.name }}</div>
+                                <div class="small" style="color:var(--lk-muted);">{{ product.slug }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge" style="background:rgba(255,255,255,.07);color:var(--lk-body-fg);border:1px solid var(--lk-card-border);font-size:.75rem;">
+                            {{ product.category.name }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold" style="color:var(--lk-body-fg);">₹{{ product.price }}</div>
+                        {% if product.discount_price %}
+                        <div class="small" style="color:#38ef7d;">Sale: ₹{{ product.discount_price }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if product.stock <= 5 %}
+                        <span class="badge" style="background:rgba(255,65,108,.12);color:#ff6b8a;border:1px solid rgba(255,65,108,.2);">
+                            Low: {{ product.stock }}
+                        </span>
+                        {% else %}
+                        <span style="color:var(--lk-body-fg);font-size:.88rem;">{{ product.stock }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if product.is_active %}
+                        <span class="small fw-semibold" style="color:#38ef7d;">
+                            <i class="bi bi-circle-fill me-1" style="font-size:.45rem;"></i>Active
+                        </span>
+                        {% else %}
+                        <span class="small" style="color:var(--lk-muted);">
+                            <i class="bi bi-circle-fill me-1" style="font-size:.45rem;"></i>Inactive
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{% url 'vendor:product_update' product.id %}" class="btn btn-sm"
+                                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'vendor:product_delete' product.id %}" class="btn btn-sm"
+                                style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;"
+                                onclick="return confirm('Delete {{ product.name }}?')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+<div class="card p-5 text-center" style="border:1px solid var(--lk-card-border);">
+    <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="bi bi-box-seam" style="font-size:1.8rem;color:#00d2ff;"></i>
+    </div>
+    <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">No products yet</h5>
+    <p style="color:var(--lk-muted);">Add your first product to start selling.</p>
+    <a href="{% url 'vendor:product_create' %}" class="btn btn-primary px-5 mt-1">
+        <i class="bi bi-plus-circle me-2"></i>Add First Product
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

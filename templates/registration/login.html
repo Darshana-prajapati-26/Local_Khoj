@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Sign In — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center py-5"
+    style="background:radial-gradient(ellipse at 30% 40%,rgba(0,210,255,.06) 0%,transparent 60%);">
+    <div class="w-100" style="max-width:440px;padding:0 1rem;">
+
+        <!-- Logo -->
+        <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <div class="logo-container d-inline-flex flex-column align-items-center">
+                    <div class="logo-main">
+                        <span class="logo-l1">L</span>
+                        <i class="bi bi-search logo-o-glass"></i>
+                        <span class="logo-l2">c</span><span class="logo-l3">a</span><span class="logo-l4">l</span>
+                    </div>
+                    <div class="logo-hindi">खोज</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="card p-4 p-md-5" style="border:1px solid rgba(0,210,255,.12);">
+            <div class="text-center mb-4">
+                <h4 class="fw-bold mb-1" style="color:var(--lk-body-fg);">Welcome back</h4>
+                <p class="small mb-0" style="color:var(--lk-muted);">Sign in to your Local Khoj account</p>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} d-flex align-items-center gap-2 mb-3">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill"></i>
+                {% elif message.tags == 'info' %}<i class="bi bi-info-circle-fill"></i>
+                {% else %}<i class="bi bi-exclamation-circle-fill"></i>{% endif %}
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Google Sign-In -->
+            <a href="{% url 'google_login' %}?next={{ next }}" class="btn w-100 mb-3 d-flex align-items-center justify-content-center gap-2"
+                style="background:#fff;border:1.5px solid #e2e8f0;color:#1e293b;border-radius:10px;padding:.65rem;font-weight:600;font-size:.92rem;box-shadow:0 2px 8px rgba(0,0,0,.08);transition:all .2s;"
+                onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,.12)'"
+                onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'">
+                <svg width="20" height="20" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                Continue with Google
+            </a>
+
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <hr style="flex:1;border-color:var(--lk-card-border);margin:0;">
+                <span style="color:var(--lk-muted);font-size:.78rem;white-space:nowrap;">or sign in with email</span>
+                <hr style="flex:1;border-color:var(--lk-card-border);margin:0;">
+            </div>
+
+            <form method="post" action="{% url 'login' %}" novalidate>
+                {% csrf_token %}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label">Username or Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Enter username or email" required
+                            style="border-left:none;border-radius:0 10px 10px 0;">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label mb-0">Password</label>
+                        <a href="{% url 'password_reset' %}" class="small text-decoration-none" style="color:#00d2ff;">Forgot?</a>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" id="pwdInput" class="form-control" placeholder="Enter your password" required
+                            style="border-left:none;border-right:none;border-radius:0;">
+                        <button type="button" class="input-group-text" onclick="togglePwd()" style="cursor:pointer;border-radius:0 10px 10px 0;">
+                            <i class="bi bi-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3" style="font-size:1rem;">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                </button>
+
+                <div class="text-center">
+                    <span class="small" style="color:var(--lk-muted);">Don't have an account?</span>
+                    <a href="{% url 'register' %}" class="small fw-semibold text-decoration-none ms-1" style="color:#00d2ff;">Create one</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'home' %}" class="small text-decoration-none" style="color:var(--lk-muted);">
+                <i class="bi bi-arrow-left me-1"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePwd() {
+    const inp = document.getElementById('pwdInput');
+    const icon = document.getElementById('eyeIcon');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    icon.className = inp.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+</script>
+{% endblock %}

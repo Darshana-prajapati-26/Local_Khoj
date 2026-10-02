@@ -1,0 +1,35 @@
+<div class="card h-100 store-card">
+    <div class="position-relative">
+        {% if store.logo %}
+            <img src="{{ store.logo.url }}" class="card-img-top" alt="{{ store.name }}">
+        {% else %}
+            <img src="{% static 'images/default_store.png' %}" class="card-img-top" alt="{{ store.name }}">
+        {% endif %}
+        {% if store.is_featured %}
+            <span class="badge bg-danger position-absolute top-0 end-0 m-2">Featured</span>
+        {% endif %}
+    </div>
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title mb-1">
+            <a href="{% url 'stores:store_detail' store.slug %}" class="text-decoration-none">{{ store.name }}</a>
+        </h5>
+        <p class="text-muted small mb-2">{{ store.category.name }}</p>
+        <div class="mb-2">
+            <span class="text-warning">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= store.rating|floatformat:0 %}★{% else %}☆{% endif %}
+                {% endfor %}
+                <span class="text-dark">({{ store.review_count }})</span>
+            </span>
+        </div>
+        <p class="card-text small text-muted mb-3">{{ store.address|truncatewords:10 }}</p>
+        <div class="mt-auto">
+            <a href="tel:{{ store.phone }}" class="btn btn-sm btn-primary w-100">Call Now</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.store-card { transition: transform 0.15s, box-shadow 0.15s; }
+.store-card:hover { transform: translateY(-6px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+</style>

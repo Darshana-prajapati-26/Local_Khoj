@@ -1,0 +1,14 @@
+<input type="file" name="image" onchange="previewImage(event)" class="form-control">
+
+<img id="preview" width="150" class="mt-3"/>
+
+<script>
+function previewImage(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+        var output = document.getElementById('preview');
+        output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>

@@ -1,0 +1,194 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}{% if service %}Edit Service{% else %}Add Service{% endif %}{% endblock %}
+
+{% block vendor_content %}
+<div class="row g-4">
+
+    <!-- Form -->
+    <div class="col-lg-8">
+        <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--lk-card-border);">
+                <div style="width:40px;height:40px;border-radius:11px;background:rgba(58,123,213,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-gear-fill" style="color:#3a7bd5;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">
+                        {% if service %}Edit Service{% else %}Add New Service{% endif %}
+                    </h5>
+                    <p class="small mb-0" style="color:var(--lk-muted);">Fill in the service details below</p>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ form.non_field_errors|join:', ' }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <div class="row g-3">
+                    <!-- Name -->
+                    <div class="col-12">
+                        <label class="form-label">Service Name <span style="color:#ff6b8a;">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}<div class="mt-1 small d-flex gap-1" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle"></i>{{ form.name.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <!-- Category + Slug -->
+                    <div class="col-md-6">
+                        <label class="form-label">Category</label>
+                        {{ form.category }}
+                        {% if form.category.errors %}<div class="mt-1 small d-flex gap-1" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle"></i>{{ form.category.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Slug</label>
+                        {{ form.slug }}
+                        <div class="mt-1 small" style="color:var(--lk-muted);">Leave blank to auto-generate.</div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}<div class="mt-1 small d-flex gap-1" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle"></i>{{ form.description.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <!-- Price + Duration -->
+                    <div class="col-md-6">
+                        <label class="form-label">Price (₹) <span style="color:#ff6b8a;">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            {{ form.price }}
+                        </div>
+                        {% if form.price.errors %}<div class="mt-1 small d-flex gap-1" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle"></i>{{ form.price.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Duration <span style="color:#ff6b8a;">*</span></label>
+                        <div class="input-group">
+                            {{ form.duration_minutes }}
+                            <span class="input-group-text">min</span>
+                        </div>
+                        <div class="mt-1 small" style="color:var(--lk-muted);">e.g. 30, 60, 90 minutes</div>
+                        {% if form.duration_minutes.errors %}<div class="mt-1 small d-flex gap-1" style="color:#ff6b8a;"><i class="bi bi-exclamation-circle"></i>{{ form.duration_minutes.errors|join:', ' }}</div>{% endif %}
+                    </div>
+
+                    <!-- Image -->
+                    <div class="col-12">
+                        <label class="form-label">Service Image</label>
+                        {% if service and service.image %}
+                        <div class="mb-2 d-flex align-items-center gap-3">
+                            <img src="{{ service.image.url }}" style="width:60px;height:60px;border-radius:10px;object-fit:cover;border:2px solid rgba(58,123,213,.2);" alt="Current">
+                            <span class="small" style="color:var(--lk-muted);">Current image — upload new to replace</span>
+                        </div>
+                        {% endif %}
+                        <div style="border:2px dashed var(--lk-card-border);border-radius:12px;padding:1.25rem;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;"
+                            onmouseover="this.style.borderColor='#3a7bd5';this.style.background='rgba(58,123,213,.04)'"
+                            onmouseout="this.style.borderColor='var(--lk-card-border)';this.style.background='transparent'">
+                            {{ form.image }}
+                            <div id="svcImgPlaceholder">
+                                <i class="bi bi-image" style="font-size:1.8rem;color:var(--lk-muted);display:block;margin-bottom:6px;"></i>
+                                <p class="mb-0 small" style="color:var(--lk-muted);">Drop image here or <span style="color:#3a7bd5;font-weight:600;">browse</span></p>
+                                <p class="mb-0 small" style="color:var(--lk-muted);font-size:.72rem;margin-top:3px;">PNG, JPG, WEBP — max 5MB</p>
+                            </div>
+                            <img id="svcImgPreview" style="display:none;max-height:120px;border-radius:8px;margin-top:6px;" alt="">
+                        </div>
+                    </div>
+
+                    <!-- Active toggle -->
+                    <div class="col-12">
+                        <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:rgba(58,123,213,.04);border:1px solid rgba(58,123,213,.12);">
+                            {{ form.is_active }}
+                            <label for="{{ form.is_active.id_for_label }}" class="fw-semibold mb-0" style="color:var(--lk-body-fg);cursor:pointer;">
+                                Active — visible to customers
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mt-4 pt-3" style="border-top:1px solid var(--lk-card-border);">
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="bi bi-check-circle me-2"></i>
+                        {% if service %}Update Service{% else %}Add Service{% endif %}
+                    </button>
+                    <a href="{% url 'vendor:services' %}" class="btn btn-sm px-4"
+                        style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:10px;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="card p-4 mb-3" style="border:1px solid rgba(58,123,213,.12);background:rgba(58,123,213,.03);">
+            <h6 class="fw-bold mb-3" style="color:#3a7bd5;font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;">
+                <i class="bi bi-lightbulb me-1"></i>Service Tips
+            </h6>
+            <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
+                <li class="small d-flex gap-2" style="color:var(--lk-muted);">
+                    <i class="bi bi-check-circle-fill mt-1 flex-shrink-0" style="color:#38ef7d;font-size:.75rem;"></i>
+                    Set an accurate duration so customers can plan their visit.
+                </li>
+                <li class="small d-flex gap-2" style="color:var(--lk-muted);">
+                    <i class="bi bi-check-circle-fill mt-1 flex-shrink-0" style="color:#38ef7d;font-size:.75rem;"></i>
+                    Add a clear photo of the service or result.
+                </li>
+                <li class="small d-flex gap-2" style="color:var(--lk-muted);">
+                    <i class="bi bi-check-circle-fill mt-1 flex-shrink-0" style="color:#38ef7d;font-size:.75rem;"></i>
+                    Write a detailed description to build customer trust.
+                </li>
+                <li class="small d-flex gap-2" style="color:var(--lk-muted);">
+                    <i class="bi bi-check-circle-fill mt-1 flex-shrink-0" style="color:#38ef7d;font-size:.75rem;"></i>
+                    Keep pricing competitive with local market rates.
+                </li>
+            </ul>
+        </div>
+
+        <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+            <h6 class="fw-bold mb-3" style="color:var(--lk-body-fg);font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;">
+                <i class="bi bi-arrow-left-right me-1" style="color:#3a7bd5;"></i>Quick Links
+            </h6>
+            <div class="d-flex flex-column gap-2">
+                <a href="{% url 'vendor:services' %}" class="btn btn-sm text-start"
+                    style="background:rgba(255,255,255,.04);border:1px solid var(--lk-card-border);color:var(--lk-body-fg);border-radius:9px;">
+                    <i class="bi bi-gear me-2" style="color:#3a7bd5;"></i>All Services
+                </a>
+                <a href="{% url 'vendor:products' %}" class="btn btn-sm text-start"
+                    style="background:rgba(255,255,255,.04);border:1px solid var(--lk-card-border);color:var(--lk-body-fg);border-radius:9px;">
+                    <i class="bi bi-box-seam me-2" style="color:#00d2ff;"></i>Products
+                </a>
+                <a href="{% url 'vendor:dashboard' %}" class="btn btn-sm text-start"
+                    style="background:rgba(255,255,255,.04);border:1px solid var(--lk-card-border);color:var(--lk-body-fg);border-radius:9px;">
+                    <i class="bi bi-speedometer2 me-2" style="color:#38ef7d;"></i>Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const svcInput = document.querySelector('input[type="file"][name="image"]');
+if (svcInput) {
+    svcInput.style.position = 'absolute';
+    svcInput.style.inset = '0';
+    svcInput.style.opacity = '0';
+    svcInput.style.cursor = 'pointer';
+    svcInput.addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('svcImgPreview').src = e.target.result;
+                document.getElementById('svcImgPreview').style.display = 'block';
+                document.getElementById('svcImgPlaceholder').style.display = 'none';
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+}
+</script>
+{% endblock %}

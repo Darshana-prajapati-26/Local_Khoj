@@ -1,0 +1,6 @@
+<div class="border rounded p-2 mb-2">
+  <strong>{{ review.user.username }}</strong>
+  <span class="badge bg-warning text-dark ms-2">{{ review.rating }}★</span>
+  <div class="small text-muted">{{ review.created_at|date:"Y-m-d H:i" }}</div>
+  <div class="mt-1">{{ review.content }}</div>
+</div>

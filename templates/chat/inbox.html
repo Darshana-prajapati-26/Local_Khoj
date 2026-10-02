@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Messages — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:720px;">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Account</p>
+            <h4 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Messages</h4>
+        </div>
+        <span class="badge px-3 py-2" style="background:rgba(0,210,255,.1);color:#00d2ff;border:1px solid rgba(0,210,255,.2);border-radius:20px;">
+            {{ threads|length }} conversation{{ threads|length|pluralize }}
+        </span>
+    </div>
+
+    {% if threads %}
+    <div class="d-flex flex-column gap-2">
+        {% for thread in threads %}
+        <a href="{% url 'chat_open' thread.store.slug %}" class="text-decoration-none">
+            <div class="card p-3 card-hover" style="border:1px solid var(--lk-card-border);transition:all .2s;">
+                <div class="d-flex align-items-center gap-3">
+
+                    <!-- Store logo -->
+                    <div style="width:52px;height:52px;border-radius:14px;overflow:hidden;flex-shrink:0;background:rgba(0,210,255,.08);border:2px solid rgba(0,210,255,.15);">
+                        {% if thread.store.logo %}
+                        <img src="{{ thread.store.logo.url }}" style="width:100%;height:100%;object-fit:cover;" alt="{{ thread.store.name }}">
+                        {% else %}
+                        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                            <i class="bi bi-shop" style="color:#00d2ff;font-size:1.2rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Thread info -->
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <div class="fw-bold text-truncate" style="color:var(--lk-body-fg);">{{ thread.store.name }}</div>
+                            <span class="small flex-shrink-0" style="color:var(--lk-muted);font-size:.72rem;">
+                                {% if thread.last_message_at %}{{ thread.last_message_at|timesince }} ago{% endif %}
+                            </span>
+                        </div>
+                        <div class="small text-truncate mt-1" style="color:var(--lk-muted);">
+                            {% if thread.last_message %}
+                            {{ thread.last_message|truncatechars:60 }}
+                            {% else %}
+                            <span style="font-style:italic;">No messages yet — say hello!</span>
+                            {% endif %}
+                        </div>
+                        {% if thread.store.area and thread.store.area.city %}
+                        <div class="small mt-1" style="color:var(--lk-muted);font-size:.72rem;">
+                            <i class="bi bi-geo-alt-fill me-1" style="color:#00d2ff;"></i>{{ thread.store.area.city.name }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Unread indicator -->
+                    {% if not thread.customer_read %}
+                    <div style="width:10px;height:10px;border-radius:50%;background:#00d2ff;box-shadow:0 0 6px rgba(0,210,255,.6);flex-shrink:0;"></div>
+                    {% else %}
+                    <i class="bi bi-chevron-right flex-shrink-0" style="color:var(--lk-muted);font-size:.8rem;"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="width:72px;height:72px;border-radius:20px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
+            <i class="bi bi-chat-dots" style="font-size:1.8rem;color:#00d2ff;"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">No messages yet</h5>
+        <p style="color:var(--lk-muted);">Start a conversation by visiting a store and clicking Chat.</p>
+        <a href="{% url 'stores:store_list' %}" class="btn btn-primary mt-2 px-5">
+            <i class="bi bi-shop me-2"></i>Browse Stores
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

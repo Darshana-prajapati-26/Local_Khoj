@@ -1,0 +1,57 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Content Pages</h2>
+    <a href="{% url 'admin_panel:content_page_add' %}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Add New Page
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 bg-white">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Title</th>
+                    <th>Slug</th>
+                    <th>Status</th>
+                    <th>Featured</th>
+                    <th>Last Update</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                <tr>
+                    <td class="ps-4 fw-bold text-dark">{{ page.title }}</td>
+                    <td><code class="small bg-light px-2 py-1 rounded">{{ page.slug }}</code></td>
+                    <td>
+                        {% if page.is_published %}
+                        <span class="badge bg-success-subtle text-success px-2 py-1">Published</span>
+                        {% else %}
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if page.is_featured %}
+                        <span class="text-warning small"><i class="bi bi-star-fill me-1"></i>Yes</span>
+                        {% else %}
+                        <span class="text-muted small">No</span>
+                        {% endif %}
+                    </td>
+                    <td class="small text-muted">{{ page.updated_at|date:"M d, Y" }}</td>
+                    <td class="text-end pe-4">
+                        <div class="btn-group">
+                            <a href="{% url 'admin_panel:content_page_edit' page.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'admin_panel:content_page_delete' page.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this page?')"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-5 text-muted">No content pages found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

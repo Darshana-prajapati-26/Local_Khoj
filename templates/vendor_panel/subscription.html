@@ -1,0 +1,28 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_content %}
+<div class="container-fluid">
+  <h4 class="mb-3">Subscription</h4>
+  {% if subscription %}
+    <div class="card p-3 mb-3">
+      <div><strong>Current Plan:</strong> {{ subscription.plan.name }}</div>
+      <div><strong>Valid Until:</strong> {{ subscription.ends_at }}</div>
+      <span class="badge bg-success">Active</span>
+    </div>
+  {% else %}
+    <div class="card p-3 mb-3">
+      <span class="badge bg-secondary">No active subscription</span>
+    </div>
+  {% endif %}
+  <div class="row">
+    {% for p in plans %}
+    <div class="col-md-4">
+      <div class="card p-3 mb-3">
+        <h5>{{ p.name }}</h5>
+        <div class="h4">₹ {{ p.price }}</div>
+        <a href="{% url 'vendor:activate_trial' p.id %}" class="btn btn-outline-primary">Activate 7‑Day Trial</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

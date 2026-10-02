@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:1000px;">
+
+    <!-- Back -->
+    <a href="{% url 'stores:store_detail' product.store.slug %}" class="btn btn-sm mb-4"
+        style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:var(--lk-muted);border-radius:9px;">
+        <i class="bi bi-arrow-left me-1"></i>Back to {{ product.store.name }}
+    </a>
+
+    <div class="row g-4">
+
+        <!-- Image -->
+        <div class="col-md-5">
+            <div class="card" style="border:1px solid var(--lk-card-border);overflow:hidden;border-radius:16px;">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                    style="width:100%;aspect-ratio:1/1;object-fit:cover;">
+                {% else %}
+                <div style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:rgba(0,210,255,.05);">
+                    <i class="bi bi-box-seam" style="font-size:4rem;color:rgba(0,210,255,.25);"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="col-md-7">
+            <div class="mb-2">
+                {% if product.category %}
+                <span class="badge" style="background:rgba(0,210,255,.1);color:#00d2ff;border:1px solid rgba(0,210,255,.2);font-size:.75rem;">
+                    {{ product.category.name }}
+                </span>
+                {% endif %}
+            </div>
+
+            <h2 class="fw-bold mb-2" style="color:var(--lk-body-fg);">{{ product.name }}</h2>
+
+            <!-- Price -->
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="fw-bold" style="font-size:1.6rem;color:#38ef7d;">₹{{ product.get_final_price }}</span>
+                {% if product.discount_price %}
+                <span style="font-size:1rem;color:var(--lk-muted);text-decoration:line-through;">₹{{ product.price }}</span>
+                <span class="badge" style="background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);">
+                    {{ product.price|floatformat:0|add:0 }}% off
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Stock -->
+            <div class="mb-3">
+                {% if product.stock > 0 %}
+                <span class="small fw-semibold" style="color:#38ef7d;">
+                    <i class="bi bi-check-circle-fill me-1"></i>In Stock ({{ product.stock }} available)
+                </span>
+                {% else %}
+                <span class="small fw-semibold" style="color:#ff6b8a;">
+                    <i class="bi bi-x-circle-fill me-1"></i>Out of Stock
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            {% if product.description %}
+            <p style="color:var(--lk-muted);line-height:1.7;margin-bottom:1.5rem;">{{ product.description }}</p>
+            {% endif %}
+
+            <!-- Store info -->
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3" style="background:rgba(255,255,255,.03);border:1px solid var(--lk-card-border);">
+                {% if product.store.logo %}
+                <img src="{{ product.store.logo.url }}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;" alt="">
+                {% else %}
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-shop" style="color:#00d2ff;"></i>
+                </div>
+                {% endif %}
+                <div>
+                    <a href="{% url 'stores:store_detail' product.store.slug %}" class="fw-semibold text-decoration-none" style="color:var(--lk-body-fg);">{{ product.store.name }}</a>
+                    {% if product.store.area %}
+                    <div class="small" style="color:var(--lk-muted);"><i class="bi bi-geo-alt-fill me-1" style="color:#00d2ff;"></i>{{ product.store.area.name }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Add to cart -->
+            {% if product.stock > 0 %}
+            <form method="post" action="{% url 'add_to_cart' 'product' product.id %}" class="d-flex gap-3 align-items-center">
+                {% csrf_token %}
+                <div class="input-group" style="max-width:130px;">
+                    <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:#94a3b8;border-radius:8px 0 0 8px;" onclick="this.parentNode.querySelector('input').stepDown()">−</button>
+                    <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="{{ product.stock }}" style="border-left:none;border-right:none;border-radius:0;">
+                    <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.06);border:1px solid var(--lk-card-border);color:#94a3b8;border-radius:0 8px 8px 0;" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+                </div>
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                </button>
+            </form>
+            {% else %}
+            <button class="btn btn-secondary px-4" disabled>Out of Stock</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="mt-5">
+        <h5 class="fw-bold mb-4" style="color:var(--lk-body-fg);">
+            <i class="bi bi-star-fill me-2" style="color:#ffc107;"></i>Customer Reviews
+            <span class="ms-2 small fw-normal" style="color:var(--lk-muted);">({{ reviews|length }})</span>
+        </h5>
+        {% if reviews %}
+        <div class="d-flex flex-column gap-3">
+            {% for r in reviews %}
+            <div class="card p-3" style="border:1px solid var(--lk-card-border);">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#3a7bd5);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.8rem;">
+                            {{ r.user.username|first|upper }}
+                        </div>
+                        <span class="fw-semibold" style="color:var(--lk-body-fg);">{{ r.user.username }}</span>
+                        {% if r.is_verified %}
+                        <span class="badge" style="background:rgba(56,239,125,.1);color:#38ef7d;border:1px solid rgba(56,239,125,.2);font-size:.7rem;">Verified</span>
+                        {% endif %}
+                    </div>
+                    <div style="color:#ffc107;">
+                        {% for i in "12345" %}{% if forloop.counter <= r.rating %}<i class="bi bi-star-fill" style="font-size:.8rem;"></i>{% else %}<i class="bi bi-star" style="font-size:.8rem;color:var(--lk-muted);"></i>{% endif %}{% endfor %}
+                    </div>
+                </div>
+                {% if r.content %}<p class="small mb-0" style="color:var(--lk-muted);">{{ r.content }}</p>{% endif %}
+                {% if r.image %}<img src="{{ r.image.url }}" class="mt-2 rounded" style="max-height:140px;object-fit:cover;" alt="">{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--lk-muted);">No reviews yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}{{ type }} Categories — Admin{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">{{ type }} Categories</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage {{ type|lower }} category catalog</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <div class="btn-group">
+            <a href="{% url 'admin_panel:store_category_list' %}" class="btn btn-sm {% if type == 'Store' %}btn-primary{% else %}btn-outline-secondary{% endif %}" style="border-radius:8px 0 0 8px;">Store</a>
+            <a href="{% url 'admin_panel:product_category_list' %}" class="btn btn-sm {% if type == 'Product' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Product</a>
+            <a href="{% url 'admin_panel:service_category_list' %}" class="btn btn-sm {% if type == 'Service' %}btn-primary{% else %}btn-outline-secondary{% endif %}" style="border-radius:0 8px 8px 0;">Service</a>
+        </div>
+        {% if type == 'Store' %}
+        <a href="{% url 'admin_panel:store_category_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add {{ type }} Category</a>
+        {% elif type == 'Product' %}
+        <a href="{% url 'admin_panel:product_category_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add {{ type }} Category</a>
+        {% elif type == 'Service' %}
+        <a href="{% url 'admin_panel:service_category_add' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add {{ type }} Category</a>
+        {% endif %}
+    </div>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>Name</th>
+                    <th>Slug</th>
+                    {% if type == 'Store' %}<th>Display Order</th>{% endif %}
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td class="ps-4 small" style="color:var(--adm-muted);">#{{ cat.id }}</td>
+                    <td class="fw-semibold" style="color:var(--adm-text);">{{ cat.name }}</td>
+                    <td><code class="small px-2 py-1 rounded" style="background:rgba(0,210,255,.08);color:#00d2ff;">{{ cat.slug }}</code></td>
+                    {% if type == 'Store' %}<td style="color:var(--adm-muted);">{{ cat.display_order }}</td>{% endif %}
+                    <td class="text-end pe-4">
+                        <div class="d-flex gap-1 justify-content-end">
+                            {% if type == 'Store' %}
+                            <a href="{% url 'admin_panel:store_category_edit' cat.pk %}" class="btn btn-sm" style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'admin_panel:store_category_delete' cat.pk %}" class="btn btn-sm" style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+                            {% elif type == 'Product' %}
+                            <a href="{% url 'admin_panel:product_category_edit' cat.pk %}" class="btn btn-sm" style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'admin_panel:product_category_delete' cat.pk %}" class="btn btn-sm" style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+                            {% elif type == 'Service' %}
+                            <a href="{% url 'admin_panel:service_category_edit' cat.pk %}" class="btn btn-sm" style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'admin_panel:service_category_delete' cat.pk %}" class="btn btn-sm" style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-tags fs-2 d-block mb-2"></i>No categories found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "admin_panel/pagination.html" with page_obj=page_obj %}
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Admin Dashboard — Local Khoj{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="mb-4">
+    <p class="text-uppercase fw-bold mb-1" style="font-size:0.7rem;letter-spacing:0.1em;color:#00d2ff;">Overview</p>
+    <h4 class="fw-bold mb-0" style="color:#fff;">Admin Dashboard</h4>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="kpi-icon" style="background:rgba(0,210,255,0.12);">
+                    <i class="bi bi-people-fill" style="color:#00d2ff;"></i>
+                </div>
+                <div>
+                    <div class="h3 fw-bold mb-0" style="color:#fff;">{{ total_users }}</div>
+                    <div class="small" style="color:#64748b;">Total Users</div>
+                    <div class="small mt-1" style="color:#475569;">V: {{ vendors }} · C: {{ customers }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="kpi-icon" style="background:rgba(56,239,125,0.12);">
+                    <i class="bi bi-shop-window" style="color:#38ef7d;"></i>
+                </div>
+                <div>
+                    <div class="h3 fw-bold mb-0" style="color:#fff;">{{ stores_count }}</div>
+                    <div class="small" style="color:#64748b;">Stores</div>
+                    <div class="small mt-1" style="color:#475569;">✓ {{ verified_stores }} verified</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="kpi-icon" style="background:rgba(58,123,213,0.12);">
+                    <i class="bi bi-box-seam" style="color:#3a7bd5;"></i>
+                </div>
+                <div>
+                    <div class="h3 fw-bold mb-0" style="color:#fff;">{{ products_count }}</div>
+                    <div class="small" style="color:#64748b;">Products</div>
+                    <div class="small mt-1" style="color:#475569;">{{ services_count }} services</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="kpi-icon" style="background:rgba(255,210,0,0.12);">
+                    <i class="bi bi-currency-rupee" style="color:#ffd200;"></i>
+                </div>
+                <div>
+                    <div class="h3 fw-bold mb-0" style="color:#fff;">₹{{ revenue }}</div>
+                    <div class="small" style="color:#64748b;">Revenue</div>
+                    <div class="small mt-1" style="color:#475569;">{{ orders_count }} orders</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-lg-7">
+
+        <!-- Recent Orders -->
+        <div class="card mb-4">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-cart3 me-2" style="color:#00d2ff;"></i>Recent Orders</span>
+                <a href="{% url 'admin_panel:order_list' %}" class="small text-decoration-none" style="color:#00d2ff;">View all</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in recent_orders %}
+                        <tr>
+                            <td style="color:#e0e6ed;">#{{ o.id }}</td>
+                            <td>
+                                <span class="badge text-capitalize"
+                                    style="{% if o.status == 'delivered' %}background:rgba(56,239,125,0.15);color:#38ef7d;{% elif o.status == 'pending' %}background:rgba(255,210,0,0.15);color:#ffd200;{% else %}background:rgba(0,210,255,0.12);color:#00d2ff;{% endif %}">
+                                    {{ o.status }}
+                                </span>
+                            </td>
+                            <td class="fw-semibold" style="color:#fff;">₹{{ o.total_amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-center py-4" style="color:#475569;">No orders yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-person-check me-2" style="color:#38ef7d;"></i>Pending User Approvals</div>
+            <div class="card-body p-0">
+                {% for u in pending_users %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <div class="fw-semibold" style="color:#fff;font-size:0.88rem;">{{ u.username }}</div>
+                        <div class="small" style="color:#64748b;">{{ u.email }} · {{ u.date_joined|date:"M d, Y" }}</div>
+                    </div>
+                    <a href="{% url 'admin_panel:user_toggle_status' u.pk %}" class="btn btn-sm"
+                        style="background:rgba(56,239,125,0.12);border:1px solid rgba(56,239,125,0.2);color:#38ef7d;">
+                        <i class="bi bi-check-lg me-1"></i>Approve
+                    </a>
+                </div>
+                {% empty %}
+                <div class="text-center py-4" style="color:#475569;"><i class="bi bi-check-all me-2"></i>No pending approvals</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Pending Store Verifications -->
+        <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-shop me-2" style="color:#3a7bd5;"></i>Pending Store Verifications</div>
+            <div class="card-body p-0">
+                {% for s in pending_stores %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <div class="fw-semibold" style="color:#fff;font-size:0.88rem;">{{ s.name }}</div>
+                        <div class="small" style="color:#64748b;">by {{ s.vendor.username }} · {{ s.created_at|date:"M d, Y" }}</div>
+                    </div>
+                    <a href="{% url 'admin_panel:store_toggle_verify' s.pk %}" class="btn btn-sm"
+                        style="background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);color:#00d2ff;">
+                        <i class="bi bi-patch-check me-1"></i>Verify
+                    </a>
+                </div>
+                {% empty %}
+                <div class="text-center py-4" style="color:#475569;"><i class="bi bi-check-all me-2"></i>No pending verifications</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Category Requests -->
+        <div class="card">
+            <div class="card-header"><i class="bi bi-tags me-2" style="color:#ffd200;"></i>Pending Category Requests</div>
+            <div class="card-body p-0">
+                {% for r in pending_categories %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <div>
+                        <div class="fw-semibold" style="color:#fff;font-size:0.88rem;">{{ r.name }}</div>
+                        <div class="small" style="color:#64748b;">by {{ r.vendor.username }} · {{ r.created_at|date:"M d, Y" }}</div>
+                    </div>
+                    <a href="{% url 'admin_panel:category_request_approve' r.pk %}" class="btn btn-sm"
+                        style="background:rgba(255,210,0,0.12);border:1px solid rgba(255,210,0,0.2);color:#ffd200;"
+                        onclick="return confirm('Approve this category?')">
+                        <i class="bi bi-check-lg me-1"></i>Approve
+                    </a>
+                </div>
+                {% empty %}
+                <div class="text-center py-4" style="color:#475569;"><i class="bi bi-check-all me-2"></i>No pending requests</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-5">
+
+        <!-- Orders by Status -->
+        <div class="card mb-4 p-4">
+            <h6 class="fw-bold mb-4" style="color:#fff;"><i class="bi bi-pie-chart me-2" style="color:#3a7bd5;"></i>Orders by Status</h6>
+            <div class="d-flex flex-column gap-2">
+                {% for s in by_status %}
+                <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <span class="text-capitalize small fw-medium" style="color:#94a3b8;">{{ s.status }}</span>
+                    <span class="badge" style="background:rgba(0,210,255,0.1);color:#00d2ff;">{{ s.c }}</span>
+                </div>
+                {% empty %}
+                <div class="text-center py-3" style="color:#475569;">No orders</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Top Stores -->
+        <div class="card">
+            <div class="card-header"><i class="bi bi-trophy me-2" style="color:#ffd200;"></i>Top Rated Stores</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Store</th>
+                            <th>Rating</th>
+                            <th>Reviews</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in top_stores %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'admin_panel:store_detail' s.pk %}" class="text-decoration-none" style="color:#e0e6ed;">{{ s.name }}</a>
+                            </td>
+                            <td style="color:#ffc107;">{{ s.rating }} ★</td>
+                            <td style="color:#64748b;">{{ s.total_reviews }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-center py-4" style="color:#475569;">No stores</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

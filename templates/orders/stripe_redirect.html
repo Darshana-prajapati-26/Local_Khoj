@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h3 class="mb-3">Redirecting to Stripe...</h3>
+  <p>Please wait while we open the secure payment page.</p>
+</div>
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  const stripe = Stripe("{{ stripe_pk }}");
+  stripe.redirectToCheckout({ sessionId: "{{ session_id }}" });
+</script>
+{% endblock %}

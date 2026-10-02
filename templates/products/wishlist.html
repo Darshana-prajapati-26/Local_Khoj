@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Wishlist</h2>
+  <div class="row">
+    {% for it in items %}
+      <div class="col-md-4">
+        <div class="card mb-3">
+          {% if it.product.image %}<img src="{{ it.product.image.url }}" class="card-img-top" style="height:200px; object-fit:cover;">{% endif %}
+          <div class="card-body">
+            <h5>{{ it.product.name }}</h5>
+            <p>₹ {{ it.product.get_final_price }}</p>
+            <a href="{% url 'product_detail' it.product.slug %}" class="btn btn-primary btn-sm">View</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>No items yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

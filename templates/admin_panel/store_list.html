@@ -1,0 +1,93 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}Stores — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">Stores</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage all business listings</p>
+    </div>
+    <a href="{% url 'admin_panel:store_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add New Store
+    </a>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">Store Name</th>
+                    <th>Vendor</th>
+                    <th>Category</th>
+                    <th>Area</th>
+                    <th>Verified</th>
+                    <th>Active</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for store in stores %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-semibold" style="color:var(--adm-text);">{{ store.name }}</div>
+                        <div class="small" style="color:var(--adm-muted);">{{ store.slug }}</div>
+                    </td>
+                    <td class="small fw-semibold" style="color:#00d2ff;">{{ store.vendor.username }}</td>
+                    <td>
+                        <span class="badge" style="background:rgba(255,255,255,.07);color:var(--adm-text);border:1px solid var(--adm-border);">
+                            {{ store.category.name }}
+                        </span>
+                    </td>
+                    <td style="color:var(--adm-text);">{{ store.area.name }}</td>
+                    <td>
+                        <a href="{% url 'admin_panel:store_toggle_verify' store.pk %}" class="text-decoration-none">
+                            {% if store.is_verified %}
+                            <span class="small fw-semibold" style="color:#38ef7d;"><i class="bi bi-patch-check-fill me-1"></i>Yes</span>
+                            {% else %}
+                            <span class="small" style="color:var(--adm-muted);">No</span>
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_panel:store_toggle_status' store.pk %}" class="text-decoration-none">
+                            {% if store.is_active %}
+                            <span class="badge" style="background:rgba(56,239,125,.12);color:#38ef7d;border:1px solid rgba(56,239,125,.2);">Active</span>
+                            {% else %}
+                            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--adm-muted);border:1px solid var(--adm-border);">Inactive</span>
+                            {% endif %}
+                        </a>
+                    </td>
+                    <td class="text-end pe-4">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{% url 'admin_panel:store_detail' store.pk %}" class="btn btn-sm"
+                                style="background:rgba(58,123,213,.1);border:1px solid rgba(58,123,213,.2);color:#3a7bd5;border-radius:7px;" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:store_edit' store.pk %}" class="btn btn-sm"
+                                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:store_delete' store.pk %}" class="btn btn-sm"
+                                style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;"
+                                onclick="return confirm('Delete this store?')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-shop fs-2 d-block mb-2"></i>No stores found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include "admin_panel/pagination.html" %}
+{% endblock %}

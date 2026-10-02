@@ -1,0 +1,150 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_page_title %}Notifications{% endblock %}
+{% block vendor_breadcrumb %}<li class="breadcrumb-item active" style="color:#64748b;">Notifications</li>{% endblock %}
+
+{% block vendor_content %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <p class="text-uppercase fw-bold mb-0" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Account</p>
+        <h5 class="fw-bold mb-0" style="color:var(--lk-body-fg);">Notifications</h5>
+    </div>
+    {% if notifications %}
+    <button id="markAllBtn" class="btn btn-sm"
+        style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:9px;">
+        <i class="bi bi-check2-all me-1"></i>Mark all read
+    </button>
+    {% endif %}
+</div>
+
+{% if notifications %}
+<div class="d-flex flex-column gap-2" id="notifList">
+    {% for n in notifications %}
+    <div class="card overflow-hidden {% if not n.is_read %}notif-unread{% endif %}"
+        id="notif-{{ n.id }}"
+        style="border:1px solid {% if not n.is_read %}rgba(0,210,255,.2){% else %}var(--lk-card-border){% endif %};transition:all .2s;cursor:pointer;"
+        onclick="openNotif('{{ n.notification_type }}', '{{ n.link_url|escapejs }}', '{{ n.related_store.slug|default:'' }}')">
+        <div class="d-flex align-items-start gap-3 p-3">
+
+            <!-- Icon -->
+            <div style="width:40px;height:40px;border-radius:11px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+                {% if n.notification_type == 'payment' %}background:rgba(56,239,125,.12);
+                {% elif n.notification_type == 'review' %}background:rgba(255,210,0,.12);
+                {% elif n.notification_type == 'message' %}background:rgba(0,210,255,.12);
+                {% elif n.notification_type == 'lead' %}background:rgba(58,123,213,.12);
+                {% elif n.notification_type == 'offer' or n.notification_type == 'promotion' %}background:rgba(255,65,108,.12);
+                {% else %}background:rgba(58,123,213,.12);{% endif %}">
+                <i class="bi
+                    {% if n.notification_type == 'payment' %}bi-credit-card-fill" style="color:#38ef7d;
+                    {% elif n.notification_type == 'review' %}bi-star-fill" style="color:#ffd200;
+                    {% elif n.notification_type == 'message' %}bi-chat-dots-fill" style="color:#00d2ff;
+                    {% elif n.notification_type == 'lead' %}bi-person-lines-fill" style="color:#3a7bd5;
+                    {% elif n.notification_type == 'offer' or n.notification_type == 'promotion' %}bi-tag-fill" style="color:#ff6b8a;
+                    {% elif n.notification_type == 'system' %}bi-bell-fill" style="color:#f59e0b;
+                    {% else %}bi-bell-fill" style="color:#3a7bd5;{% endif %}
+                    font-size:.95rem;"></i>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-grow-1 min-width-0">
+                <div class="d-flex align-items-start justify-content-between gap-2">
+                    <div class="fw-semibold" style="color:var(--lk-body-fg);font-size:.9rem;">
+                        {{ n.title }}
+                        {% if not n.is_read %}
+                        <span class="badge ms-1" style="background:rgba(0,210,255,.15);color:#00d2ff;font-size:.65rem;border-radius:20px;padding:2px 7px;">New</span>
+                        {% endif %}
+                    </div>
+                    <span class="small flex-shrink-0" style="color:var(--lk-muted);font-size:.72rem;">{{ n.created_at|timesince }} ago</span>
+                </div>
+                {% if n.body %}
+                <p class="small mb-0 mt-1" style="color:var(--lk-muted);line-height:1.5;">{{ n.body }}</p>
+                {% endif %}
+                {% if n.related_store %}
+                <div class="small mt-1" style="color:var(--lk-muted);font-size:.75rem;">
+                    <i class="bi bi-shop me-1" style="color:#00d2ff;"></i>{{ n.related_store.name }}
+                </div>
+                {% endif %}
+                <!-- Action hint -->
+                <div class="small mt-1" style="color:#00d2ff;font-size:.75rem;">
+                    {% if n.notification_type == 'message' %}<i class="bi bi-arrow-right me-1"></i>Click to open chat
+                    {% elif n.notification_type == 'review' %}<i class="bi bi-arrow-right me-1"></i>Click to view review
+                    {% elif n.notification_type == 'lead' %}<i class="bi bi-arrow-right me-1"></i>Click to view lead
+                    {% elif n.notification_type == 'payment' %}<i class="bi bi-arrow-right me-1"></i>Click to view order
+                    {% elif n.link_url %}<i class="bi bi-arrow-right me-1"></i>Click to open
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Delete -->
+            <button class="btn btn-sm flex-shrink-0 delete-notif-btn" data-id="{{ n.id }}"
+                style="width:30px;height:30px;padding:0;background:rgba(255,65,108,.08);border:1px solid rgba(255,65,108,.15);color:#ff6b8a;border-radius:8px;opacity:.6;transition:opacity .2s;"
+                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='.6'"
+                onclick="event.stopPropagation();deleteNotif({{ n.id }})" title="Delete">
+                <i class="bi bi-x" style="font-size:.9rem;"></i>
+            </button>
+        </div>
+        {% if not n.is_read %}
+        <div style="height:2px;background:linear-gradient(90deg,#00d2ff,#3a7bd5);"></div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+{% else %}
+<div class="card p-5 text-center" style="border:1px solid var(--lk-card-border);">
+    <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="bi bi-bell-slash" style="font-size:1.8rem;color:#00d2ff;"></i>
+    </div>
+    <h6 class="fw-bold mb-1" style="color:var(--lk-body-fg);">All caught up!</h6>
+    <p class="small mb-0" style="color:var(--lk-muted);">No notifications right now.</p>
+</div>
+{% endif %}
+
+<script>
+const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+
+function openNotif(type, linkUrl, storeSlug) {
+    // Use link_url if available, otherwise fall back to type-based routing
+    if (linkUrl) {
+        window.location.href = linkUrl;
+    } else if (type === 'message' && storeSlug) {
+        window.location.href = '/chat/' + storeSlug + '/';
+    } else if (type === 'review' && storeSlug) {
+        window.location.href = '/stores/store/' + storeSlug + '/#tab-reviews';
+    } else if (type === 'lead') {
+        window.location.href = '/vendor/leads/';
+    } else if (type === 'payment') {
+        window.location.href = '/vendor/orders/';
+    }
+}
+
+function deleteNotif(id) {
+    fetch("{% url 'api_notification_delete' 0 %}".replace("0", id), {
+        method: "POST", headers: { "X-CSRFToken": CSRF }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.deleted || data.ok) {
+            const el = document.getElementById('notif-' + id);
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(20px)';
+            el.style.transition = 'all .3s';
+            setTimeout(() => el.remove(), 300);
+        }
+    });
+}
+
+document.getElementById('markAllBtn')?.addEventListener('click', async function() {
+    await fetch('/api/notifications/mark-all-read/', {
+        method: 'POST', headers: { 'X-CSRFToken': CSRF }
+    });
+    document.querySelectorAll('.notif-unread').forEach(el => {
+        el.classList.remove('notif-unread');
+        el.style.borderColor = 'var(--lk-card-border)';
+        el.querySelector('.badge')?.remove();
+        el.querySelector('div[style*="height:2px"]')?.remove();
+    });
+    this.style.display = 'none';
+});
+</script>
+{% endblock %}

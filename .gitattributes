@@ -1,0 +1,6 @@
+# Normalize line endings
+* text=auto
+
+# Shell scripts must use LF on all platforms (Linux/Render needs this)
+*.sh text eol=lf
+Procfile text eol=lf

@@ -1,0 +1,68 @@
+<div class="row g-2 mb-4">
+    <div class="col-md">
+        <form method="get" id="adminSearchForm" class="d-flex h-100">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" id="adminSearchInput" class="form-control"
+                    placeholder="Search..." value="{{ search_query }}" autocomplete="off">
+                {% for key, value in request.GET.items %}
+                {% if key != 'q' and key != 'page' %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                {% endif %}
+                {% endfor %}
+                {% if search_query %}
+                <a href="{{ request.path }}{% if request.GET|length > 1 %}?{% for k,v in request.GET.items %}{% if k != 'q' and k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}{% endif %}"
+                    class="btn" style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;" title="Clear search">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+                <button class="btn btn-primary px-4" type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+
+    {% if filter_options %}
+    <div class="col-md-auto">
+        <div class="dropdown">
+            <button class="btn btn-sm dropdown-toggle px-3"
+                style="background:rgba(255,255,255,.06);border:1px solid var(--adm-border);color:var(--adm-text);"
+                type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-filter me-1"></i> Filter
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end"
+                style="background:var(--adm-sidebar);border:1px solid var(--adm-border);min-width:200px;">
+                <li><span class="px-3 py-1 d-block" style="font-size:.65rem;color:var(--adm-muted);text-transform:uppercase;font-weight:700;">Filter by:</span></li>
+                {% for filter in filter_options %}
+                <li><hr class="dropdown-divider" style="border-color:var(--adm-border);"></li>
+                <li><span class="dropdown-item disabled fw-bold" style="color:var(--adm-text);font-size:.82rem;">{{ filter.label }}</span></li>
+                {% for opt in filter.options %}
+                <li>
+                    <a class="dropdown-item" href="{{ opt.url }}"
+                        style="color:{% if opt.active %}#00d2ff{% else %}var(--adm-muted){% endif %};font-size:.85rem;{% if opt.active %}background:rgba(0,210,255,.08);{% endif %}">
+                        {% if opt.active %}<i class="bi bi-check me-1"></i>{% endif %}{{ opt.label }}
+                    </a>
+                </li>
+                {% endfor %}
+                {% endfor %}
+                <li><hr class="dropdown-divider" style="border-color:var(--adm-border);"></li>
+                <li><a class="dropdown-item" href="{{ request.path }}" style="color:#ff6b8a;font-size:.85rem;">
+                    <i class="bi bi-x-circle me-1"></i>Clear All Filters
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+(function(){
+    const input = document.getElementById('adminSearchInput');
+    const form  = document.getElementById('adminSearchForm');
+    if (!input || !form) return;
+    let timer;
+    input.addEventListener('input', function(){
+        clearTimeout(timer);
+        timer = setTimeout(function(){ form.submit(); }, 400);
+    });
+})();
+</script>

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Favorites - LocalKhoj{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h3>Your Favorites</h3>
+  <div class="row g-3 mt-3">
+    {% for fav in favorites %}
+      <div class="col-md-4">
+        {% include 'components/store_card.html' with store=fav.store %}
+      </div>
+    {% empty %}
+      <div class="col-12"><p>You haven't saved any favorites yet.</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

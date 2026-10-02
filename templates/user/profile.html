@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Profile — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+
+        <!-- Profile Card -->
+        <div class="col-md-4">
+            <div class="card p-4 text-center" style="border:1px solid rgba(0,210,255,.12);">
+                <div class="mb-3">
+                    {% if user_profile.profile_image %}
+                    <img src="{{ user_profile.profile_image.url }}" alt="Profile"
+                        style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(0,210,255,.3);">
+                    {% else %}
+                    <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#00d2ff,#3a7bd5);display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:2rem;color:#fff;font-weight:700;">
+                        {{ user_profile.username|first|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+                <h5 class="fw-bold mb-1" style="color:var(--lk-body-fg);">{{ user_profile.get_full_name|default:user_profile.username }}</h5>
+                <p class="small mb-2" style="color:var(--lk-muted);">{{ user_profile.email }}</p>
+                <span class="badge mb-3 text-capitalize"
+                    style="background:rgba(0,210,255,.12);color:#00d2ff;border:1px solid rgba(0,210,255,.2);">
+                    {{ user_profile.user_type|default:"Customer" }}
+                </span>
+                <div class="small mb-3" style="color:var(--lk-muted);">
+                    <i class="bi bi-calendar3 me-1"></i>Joined {{ user_profile.date_joined|date:"M Y" }}
+                </div>
+                <a href="{% url 'user:edit_profile' %}" class="btn btn-primary w-100">
+                    <i class="bi bi-pencil me-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- Account Details -->
+        <div class="col-md-8">
+            <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+                <h5 class="fw-bold mb-4" style="color:var(--lk-body-fg);font-size:1rem;">
+                    <i class="bi bi-person-lines-fill me-2" style="color:#00d2ff;"></i>Account Details
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Username</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.username }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Email</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.email }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Phone</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.phone|default:"—" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">City</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.city|default:"—" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Account Type</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.user_type|default:"Customer"|title }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background:var(--lk-surface-1);border:1px solid var(--lk-card-border);">
+                            <div class="small fw-semibold mb-1" style="color:var(--lk-muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Member Since</div>
+                            <div style="color:var(--lk-body-fg);font-size:.9rem;">{{ user_profile.date_joined|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user_profile.bio %}
+                <div class="mt-4 p-3 rounded-3" style="background:rgba(0,210,255,.04);border:1px solid rgba(0,210,255,.1);">
+                    <div class="small fw-semibold mb-2" style="color:#00d2ff;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;">Bio</div>
+                    <p class="mb-0 small" style="color:var(--lk-muted);line-height:1.7;">{{ user_profile.bio }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

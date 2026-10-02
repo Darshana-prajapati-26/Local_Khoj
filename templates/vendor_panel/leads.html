@@ -1,0 +1,30 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_content %}
+<div class="container-fluid">
+  <h4 class="mb-3">Leads</h4>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Message</th>
+        <th>Source</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for lead in leads %}
+      <tr>
+        <td>{{ lead.customer_name }}</td>
+        <td><a href="tel:{{ lead.customer_phone }}">{{ lead.customer_phone }}</a></td>
+        <td>{{ lead.message|default:"—" }}</td>
+        <td>{{ lead.source }}</td>
+        <td>{{ lead.created_at }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">No leads yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

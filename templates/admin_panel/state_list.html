@@ -1,0 +1,59 @@
+{% extends "admin_panel/admin_base.html" %}
+{% block title %}States — Admin{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-0" style="color:var(--adm-text);">States</h4>
+        <p class="small mb-0" style="color:var(--adm-muted);">Manage states / provinces</p>
+    </div>
+    <a href="{% url 'admin_panel:state_add' %}" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Add New State
+    </a>
+</div>
+
+{% include "admin_panel/search_bar.html" %}
+
+<div class="card" style="border:1px solid var(--adm-border);">
+    <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th class="ps-4">ID</th>
+                    <th>State Name</th>
+                    <th>Code</th>
+                    <th class="text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for state in states %}
+                <tr>
+                    <td class="ps-4 small" style="color:var(--adm-muted);">#{{ state.id }}</td>
+                    <td class="fw-semibold" style="color:var(--adm-text);">{{ state.name }}</td>
+                    <td><code class="small px-2 py-1 rounded" style="background:rgba(0,210,255,.08);color:#00d2ff;">{{ state.code }}</code></td>
+                    <td class="text-end pe-4">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="{% url 'admin_panel:state_edit' state.pk %}" class="btn btn-sm"
+                                style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:7px;">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'admin_panel:state_delete' state.pk %}" class="btn btn-sm"
+                                style="background:rgba(255,65,108,.1);border:1px solid rgba(255,65,108,.2);color:#ff6b8a;border-radius:7px;"
+                                onclick="return confirm('Delete this state?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5" style="color:var(--adm-muted);">
+                        <i class="bi bi-globe fs-2 d-block mb-2"></i>No states found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "admin_panel/pagination.html" with page_obj=page_obj %}
+{% endblock %}

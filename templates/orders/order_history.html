@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}My Orders — Local Khoj{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <p class="text-uppercase fw-bold mb-1" style="font-size:.72rem;letter-spacing:.1em;color:#00d2ff;">Account</p>
+            <h3 class="fw-bold mb-0" style="color:var(--lk-body-fg);">My Orders</h3>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-sm"
+            style="background:rgba(0,210,255,.1);border:1px solid rgba(0,210,255,.2);color:#00d2ff;border-radius:9px;">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+    </div>
+
+    {% if orders %}
+    <div class="d-flex flex-column gap-3">
+        {% for order in orders %}
+        <div class="card" style="border:1px solid var(--lk-card-border);">
+            <div class="card-body p-0">
+                <!-- Order Header -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-4"
+                    style="border-bottom:1px solid var(--lk-card-border);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width:42px;height:42px;border-radius:11px;background:rgba(0,210,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <i class="bi bi-bag-check" style="color:#00d2ff;font-size:1.1rem;"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold" style="color:var(--lk-body-fg);">Order #{{ order.id }}</div>
+                            <div class="small" style="color:var(--lk-muted);">{{ order.created_at|date:"M d, Y · g:i A" }}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 flex-wrap">
+                        <!-- Status badge -->
+                        <span class="badge px-3 py-2"
+                            style="border-radius:20px;font-size:.78rem;font-weight:700;
+                            {% if order.status == 'delivered' or order.status == 'completed' %}background:rgba(56,239,125,.15);color:#38ef7d;border:1px solid rgba(56,239,125,.25);
+                            {% elif order.status == 'cancelled' %}background:rgba(255,65,108,.15);color:#ff6b8a;border:1px solid rgba(255,65,108,.25);
+                            {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}background:rgba(0,210,255,.15);color:#00d2ff;border:1px solid rgba(0,210,255,.25);
+                            {% elif order.status == 'processing' or order.status == 'confirmed' %}background:rgba(58,123,213,.15);color:#3a7bd5;border:1px solid rgba(58,123,213,.25);
+                            {% else %}background:rgba(255,210,0,.15);color:#ffd200;border:1px solid rgba(255,210,0,.25);{% endif %}">
+                            <i class="bi
+                                {% if order.status == 'delivered' or order.status == 'completed' %}bi-check-circle-fill
+                                {% elif order.status == 'cancelled' %}bi-x-circle-fill
+                                {% elif order.status == 'shipped' %}bi-truck
+                                {% elif order.status == 'out_for_delivery' %}bi-bicycle
+                                {% elif order.status == 'processing' %}bi-gear-fill
+                                {% elif order.status == 'confirmed' %}bi-check2-circle
+                                {% else %}bi-clock-fill{% endif %} me-1"></i>
+                            {{ order.get_status_display }}
+                        </span>
+                        <span class="fw-bold" style="color:var(--lk-body-fg);font-size:1.05rem;">₹{{ order.total_amount }}</span>
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-primary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Order Items Preview -->
+                <div class="px-4 py-3">
+                    <div class="d-flex flex-wrap gap-3 align-items-center">
+                        {% for item in order.items.all|slice:":4" %}
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:36px;height:36px;border-radius:8px;overflow:hidden;background:var(--lk-surface-1);flex-shrink:0;">
+                                {% if item.product and item.product.image %}
+                                <img src="{{ item.product.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                                {% else %}
+                                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                                    <i class="bi bi-{% if item.service %}gear{% else %}box-seam{% endif %}" style="color:var(--lk-muted);font-size:.8rem;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="small fw-medium" style="color:var(--lk-body-fg);font-size:.82rem;">
+                                    {% if item.product %}{{ item.product.name|truncatechars:20 }}{% else %}{{ item.service.name|truncatechars:20 }}{% endif %}
+                                </div>
+                                <div class="small" style="color:var(--lk-muted);font-size:.75rem;">Qty: {{ item.quantity }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if order.items.count > 4 %}
+                        <span class="small" style="color:var(--lk-muted);">+{{ order.items.count|add:"-4" }} more</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="text-center py-5">
+        <div style="width:80px;height:80px;border-radius:20px;background:rgba(0,210,255,.08);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;">
+            <i class="bi bi-bag-x" style="font-size:2rem;color:#00d2ff;"></i>
+        </div>
+        <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">No orders yet</h5>
+        <p style="color:var(--lk-muted);">You haven't placed any orders. Start shopping!</p>
+        <a href="{% url 'stores:store_list' %}" class="btn btn-primary mt-2 px-5">
+            <i class="bi bi-shop me-2"></i>Browse Stores
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

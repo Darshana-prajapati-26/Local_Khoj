@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <h3 class="mb-3">Offers & Deals</h3>
+  <p class="text-muted">Latest promotions from verified businesses.</p>
+  <div class="alert alert-info">No offers available right now.</div>
+  <a class="btn btn-outline-primary" href="{% url 'stores:store_list' %}">Browse Stores</a>
+</div>
+{% endblock %}

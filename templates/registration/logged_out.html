@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Logged out - LocalKhoj{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="alert alert-info">You have been logged out.</div>
+  <a href="{% url 'login' %}" class="btn btn-primary">Sign in</a>
+</div>
+{% endblock %}

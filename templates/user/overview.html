@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-5">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">Your Activity Overview</h3>
+    <a href="{% url 'user:profile' %}" class="btn btn-outline-secondary btn-sm">Edit Profile</a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Recent Orders</h6>
+          {% if orders %}
+          <ul class="list-group list-group-flush">
+            {% for o in orders|slice:":6" %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>#{{ o.id }} <span class="badge bg-light text-dark text-capitalize ms-2">{{ o.status }}</span></span>
+              <span>₹ {{ o.total_amount }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          <a href="{% url 'orders_list' %}" class="btn btn-sm btn-primary mt-3" style="display:none">View all</a>
+          {% else %}
+          <div class="text-muted">No orders yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Recent Items</h6>
+          {% if recent_items %}
+          <ul class="list-group list-group-flush">
+            {% for it in recent_items %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{% if it.product %}{{ it.product.name }}{% elif it.service %}{{ it.service.name }}{% else %}-{%
+                endif %}</span>
+              <span class="small text-muted">Qty {{ it.quantity }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="text-muted">No recent items.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Notifications</h6>
+          {% if notifications %}
+          <ul class="list-group list-group-flush">
+            {% for n in notifications %}
+            <li class="list-group-item">
+              <div class="fw-semibold">{{ n.title }}</div>
+              <div class="small text-muted">{{ n.body }}</div>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="text-muted">No notifications.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mt-3">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Recent Searches</h6>
+          {% if searches %}
+          <ul class="list-group list-group-flush">
+            {% for s in searches %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{ s.query }}</span>
+              <span class="badge bg-light text-dark">{{ s.search_type }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="text-muted">No searches yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="mb-3">Recent Activity</h6>
+          {% if interactions %}
+          <ul class="list-group list-group-flush">
+            {% for i in interactions %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span class="text-capitalize">{{ i.interaction_type }}</span>
+              <span class="small text-muted">{{ i.created_at }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <div class="text-muted">No activity yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

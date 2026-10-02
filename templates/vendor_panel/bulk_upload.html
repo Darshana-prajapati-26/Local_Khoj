@@ -1,0 +1,16 @@
+{% extends "vendor_panel/base_vendor.html" %}
+{% block vendor_content %}
+<div class="container-fluid">
+  <h4 class="mb-3">Bulk Product Upload (CSV)</h4>
+  <p class="text-muted">Columns: category_slug,name,slug,description,price,discount_price,stock</p>
+  <form method="post" enctype="multipart/form-data" class="row g-2">
+    {% csrf_token %}
+    <div class="col-md-6">
+      <input type="file" name="file" class="form-control" accept=".csv" required>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary">Upload</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

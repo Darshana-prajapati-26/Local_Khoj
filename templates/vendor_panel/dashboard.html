@@ -1,0 +1,307 @@
+﻿{% extends "vendor_panel/base_vendor.html" %}
+{% load static %}
+
+{% block vendor_page_title %}Dashboard{% endblock %}
+
+{% block vendor_content %}
+
+{% if not store %}
+<div class="card p-5 text-center" style="border:1px solid rgba(0,210,255,0.12);">
+    <div style="width:64px;height:64px;border-radius:16px;background:rgba(0,210,255,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="bi bi-shop" style="font-size:1.8rem;color:#00d2ff;"></i>
+    </div>
+    <h5 class="fw-bold mb-2" style="color:var(--lk-body-fg);">No Store Yet</h5>
+    <p style="color:var(--lk-muted);">Create your store to start selling and reaching local customers.</p>
+    <a href="{% url 'stores:create_store' %}" class="btn btn-primary px-5 mt-2">
+        <i class="bi bi-plus-circle me-2"></i>Create Store
+    </a>
+</div>
+{% else %}
+
+<!-- Store Banner -->
+<div class="card mb-4 overflow-hidden" style="border:1px solid rgba(0,210,255,0.12);">
+    <div style="background:linear-gradient(135deg,{{ store.theme_color|default:'#1a1c23' }},#0a0b10);padding:1.5rem;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                {% if store.logo %}
+                <img src="{{ store.logo.url }}" style="width:56px;height:56px;border-radius:14px;object-fit:cover;border:2px solid rgba(0,210,255,0.3);" alt="{{ store.name }}">
+                {% else %}
+                <div style="width:56px;height:56px;border-radius:14px;background:rgba(0,210,255,0.15);display:flex;align-items:center;justify-content:center;">
+                    <i class="bi bi-shop" style="color:#00d2ff;font-size:1.5rem;"></i>
+                </div>
+                {% endif %}
+                <div>
+                    <h5 class="fw-bold mb-1" style="color:var(--lk-body-fg);">{{ store.name }}
+                        {% if store.featured %}<span class="badge ms-2" style="background:rgba(255,210,0,0.2);color:#ffd200;font-size:0.7rem;">Featured</span>{% endif %}
+                    </h5>
+                    <div class="small" style="color:rgba(255,255,255,0.5);">Grow your business with insights and tools</div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                {% if subscription %}
+                <span class="badge px-3 py-2" style="background:rgba(56,239,125,0.15);color:#38ef7d;border:1px solid rgba(56,239,125,0.25);">
+                    <i class="bi bi-check-circle me-1"></i>{{ subscription.plan.name }}
+                </span>
+                {% else %}
+                <a href="{% url 'vendor:subscription' %}" class="btn btn-sm" style="background:rgba(255,210,0,0.15);border:1px solid rgba(255,210,0,0.25);color:#ffd200;">
+                    <i class="bi bi-lightning-charge me-1"></i>Activate Plan
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card p-3 h-100" style="border:1px solid rgba(0,210,255,0.12);">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,210,255,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-box-seam" style="color:#00d2ff;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ total_products }}</div>
+                    <div class="small" style="color:var(--lk-muted);">Products</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 h-100" style="border:1px solid rgba(58,123,213,0.12);">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(58,123,213,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-tools" style="color:#3a7bd5;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ total_services }}</div>
+                    <div class="small" style="color:var(--lk-muted);">Services</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 h-100" style="border:1px solid rgba(255,210,0,0.12);">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,210,0,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-archive" style="color:#ffd200;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">{{ total_stock }}</div>
+                    <div class="small" style="color:var(--lk-muted);">Stock</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card p-3 h-100" style="border:1px solid rgba(56,239,125,0.12);">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(56,239,125,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-cash-coin" style="color:#38ef7d;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <div class="h4 fw-bold mb-0" style="color:var(--lk-body-fg);">₹{{ revenue_total }}</div>
+                    <div class="small" style="color:var(--lk-muted);">Revenue</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card p-4 mb-4" style="border:1px solid var(--lk-card-border);">
+    <h6 class="fw-bold mb-3" style="color:#fff;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;">Quick Actions</h6>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'vendor:products' %}" class="btn btn-primary btn-sm"><i class="bi bi-box-seam me-1"></i>Products</a>
+        <a href="{% url 'vendor:orders' %}" class="btn btn-sm" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;"><i class="bi bi-bag-check me-1"></i>Orders</a>
+        <a href="{% url 'vendor:product_bulk_upload' %}" class="btn btn-sm" style="background:rgba(0,210,255,0.08);border:1px solid rgba(0,210,255,0.15);color:#00d2ff;"><i class="bi bi-upload me-1"></i>Bulk Upload</a>
+        <a href="{% url 'vendor:subscription' %}" class="btn btn-sm" style="background:rgba(56,239,125,0.08);border:1px solid rgba(56,239,125,0.15);color:#38ef7d;"><i class="bi bi-lightning-charge me-1"></i>Subscription</a>
+        <a href="{% url 'stores:edit_store' store.slug %}" class="btn btn-sm" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;"><i class="bi bi-gear me-1"></i>Store Settings</a>
+        <a href="{% url 'vendor:request_category' %}" class="btn btn-sm" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;"><i class="bi bi-tags me-1"></i>Request Category</a>
+    </div>
+</div>
+
+<!-- KYC Status -->
+<div class="card p-4 mb-4 d-flex flex-row align-items-center justify-content-between" style="border:1px solid var(--lk-card-border);">
+    <div class="d-flex align-items-center gap-3">
+        <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,210,255,0.08);display:flex;align-items:center;justify-content:center;">
+            <i class="bi bi-shield-check" style="color:#00d2ff;"></i>
+        </div>
+        <div>
+            <div class="fw-semibold" style="color:#fff;font-size:0.9rem;">KYC Verification</div>
+            <div class="small" style="color:var(--lk-muted);">
+                {% if kyc %}{% if kyc.is_verified %}Documents verified{% else %}Under review{% endif %}{% else %}Not uploaded{% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+        {% if kyc %}
+        {% if kyc.is_verified %}
+        <span class="badge" style="background:rgba(56,239,125,0.15);color:#38ef7d;"><i class="bi bi-patch-check-fill me-1"></i>Verified</span>
+        {% else %}
+        <span class="badge" style="background:rgba(255,210,0,0.15);color:#ffd200;"><i class="bi bi-clock me-1"></i>Pending</span>
+        {% endif %}
+        {% else %}
+        <span class="badge" style="background:rgba(255,255,255,0.06);color:#64748b;">Not Uploaded</span>
+        {% endif %}
+        <a href="{% url 'vendor:kyc_upload' %}" class="btn btn-sm" style="background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);color:#00d2ff;">Upload KYC</a>
+    </div>
+</div>
+
+<!-- Pending Category Requests -->
+{% if pending_category_requests %}
+<div class="card p-3 mb-4" style="border:1px solid rgba(255,210,0,0.2);background:rgba(255,210,0,0.04);">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-hourglass-split" style="color:#ffd200;font-size:1.1rem;"></i>
+            <div>
+                <div class="fw-semibold" style="color:#fff;font-size:.88rem;">Category Requests Pending</div>
+                <div class="small" style="color:var(--lk-muted);">{{ pending_category_requests }} request(s) awaiting admin approval</div>
+            </div>
+        </div>
+        <a href="{% url 'vendor:request_category' %}" class="btn btn-sm" style="background:rgba(255,210,0,0.15);border:1px solid rgba(255,210,0,0.25);color:#ffd200;border-radius:9px;">
+            <i class="bi bi-eye me-1"></i>View Status
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    <!-- Revenue Chart -->
+    <div class="col-lg-8">
+        <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+            <h6 class="fw-bold mb-4" style="color:var(--lk-body-fg);"><i class="bi bi-graph-up me-2" style="color:#00d2ff;"></i>Monthly Revenue</h6>
+            <canvas id="revChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Order Status -->
+    <div class="col-lg-4">
+        <div class="card p-4" style="border:1px solid var(--lk-card-border);">
+            <h6 class="fw-bold mb-4" style="color:var(--lk-body-fg);"><i class="bi bi-pie-chart me-2" style="color:#3a7bd5;"></i>Order Status</h6>
+            <canvas id="statusChart" height="160"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-0">
+    <!-- Recent Orders -->
+    <div class="col-lg-6">
+        <div class="card" style="border:1px solid var(--lk-card-border);">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-bag-check me-2" style="color:#00d2ff;"></i>Recent Orders</span>
+                <a href="{% url 'vendor:orders' %}" class="small text-decoration-none" style="color:#00d2ff;">View all</a>
+            </div>
+            <div class="card-body p-0">
+                {% for row in recent_rows %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--lk-card-border);">
+                    <div>
+                        <div class="fw-semibold" style="color:#fff;font-size:0.88rem;">#{{ row.order.id }}</div>
+                        <div class="small" style="color:var(--lk-muted);">{{ row.order.user.username }}</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge text-capitalize"
+                            style="{% if row.order.status == 'delivered' %}background:rgba(56,239,125,0.15);color:#38ef7d;{% elif row.order.status == 'pending' %}background:rgba(255,210,0,0.15);color:#ffd200;{% else %}background:rgba(0,210,255,0.12);color:#00d2ff;{% endif %}">
+                            {{ row.order.status }}
+                        </span>
+                        <span class="fw-bold" style="color:var(--lk-body-fg);">₹{{ row.vendor_total }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5" style="color:var(--lk-muted);">
+                    <i class="bi bi-bag-x fs-2 d-block mb-2"></i>No orders yet
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Products -->
+    <div class="col-lg-6">
+        <div class="card" style="border:1px solid var(--lk-card-border);">
+            <div class="card-header"><i class="bi bi-trophy me-2" style="color:#ffd200;"></i>Top Products</div>
+            <div class="card-body p-0">
+                {% for p in top_products %}
+                <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--lk-card-border);">
+                    <span class="small fw-medium" style="color:var(--lk-body-fg);">{{ p.product__name }}</span>
+                    <div class="d-flex gap-3">
+                        <span class="small" style="color:var(--lk-muted);">Qty: {{ p.q }}</span>
+                        <span class="small fw-bold" style="color:#38ef7d;">₹{{ p.rev }}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5" style="color:var(--lk-muted);"><i class="bi bi-box-seam fs-2 d-block mb-2"></i>No data</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Low Stock Alert -->
+{% if low_stock_products %}
+<div class="card mt-4" style="border:1px solid rgba(255,65,108,0.15);">
+    <div class="card-header" style="background:rgba(255,65,108,0.06);color:#ff6b8a;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>Low Stock Alerts
+    </div>
+    <div class="card-body p-0">
+        {% for lp in low_stock_products %}
+        <div class="d-flex align-items-center justify-content-between px-4 py-3" style="border-bottom:1px solid var(--lk-card-border);">
+            <span class="small fw-medium" style="color:var(--lk-body-fg);">{{ lp.name }}</span>
+            <span class="badge" style="background:rgba(255,65,108,0.15);color:#ff6b8a;">{{ lp.stock }} left</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+Chart.defaults.color = '#64748b';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+const revCtx = document.getElementById('revChart');
+new Chart(revCtx, {
+    type: 'line',
+    data: {
+        labels: {{ months|safe }},
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: {{ month_data|safe }},
+            borderColor: '#00d2ff',
+            backgroundColor: 'rgba(0,210,255,0.08)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#00d2ff',
+            pointRadius: 4,
+        }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } },
+            x: { grid: { color: 'rgba(255,255,255,0.04)' } }
+        }
+    }
+});
+
+const statusCtx = document.getElementById('statusChart');
+new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Pending', 'Confirmed', 'Processing', 'Completed', 'Cancelled'],
+        datasets: [{
+            data: {{ status_series|safe }},
+            backgroundColor: ['rgba(255,210,0,0.8)','rgba(0,210,255,0.8)','rgba(58,123,213,0.8)','rgba(56,239,125,0.8)','rgba(255,65,108,0.8)'],
+            borderWidth: 0,
+        }]
+    },
+    options: {
+        plugins: { legend: { position: 'bottom', labels: { padding: 12, font: { size: 11 } } } },
+        cutout: '65%'
+    }
+});
+</script>
+
+{% endif %}
+{% endblock %}
+

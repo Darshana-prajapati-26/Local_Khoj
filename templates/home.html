@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% load static core_tags %}
+
+{% block title %}Local Khoj — Find Everything Near You{% endblock %}
+
+{% block content %}
+
+<!-- ===== HERO SECTION ===== -->
+<section class="hero-section">
+    <div class="container position-relative" style="z-index:1;">
+        <div class="mb-3">
+            <span class="badge px-3 py-2" style="background:rgba(0,210,255,0.15);color:#00d2ff;border:1px solid rgba(0,210,255,0.25);border-radius:20px;font-size:0.8rem;letter-spacing:0.05em;">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Discover Local Businesses
+            </span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Find Everything <span style="background:linear-gradient(135deg,#00d2ff,#3a7bd5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Near You</span></h1>
+        <p class="hero-sub mb-4">Shops, restaurants, services and more — all in your neighbourhood.</p>
+
+        <form action="{% url 'search' %}" method="get" id="heroSearchForm">
+            <div class="search-container">
+                <i class="bi bi-search me-2" style="color:rgba(255,255,255,0.5);font-size:1.1rem;flex-shrink:0;"></i>
+                <input type="text" name="q" id="heroQ" placeholder="Search stores, products, services..." autocomplete="off">
+                <input type="hidden" name="lat" id="heroLat">
+                <input type="hidden" name="lng" id="heroLng">
+                <input type="hidden" name="state" id="heroState">
+                <input type="hidden" name="city" id="heroCity">
+                <button id="voiceBtn" type="button" class="btn btn-sm me-1"
+                    style="background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);border-radius:8px;padding:6px 10px;">
+                    <i class="bi bi-mic-fill"></i>
+                </button>
+                <button type="submit" class="btn-search">Search</button>
+            </div>
+        </form>
+
+    </div>
+</section>
+
+<div class="container my-5">
+
+    <!-- ===== EXPLORE CATEGORIES ===== -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="text-uppercase fw-bold mb-1" style="font-size:0.72rem;letter-spacing:0.1em;color:#00d2ff;">Browse</p>
+            <h2 class="fw-bold mb-0 section-heading">Explore Categories</h2>
+        </div>
+        <a href="{% url 'explore' %}" class="btn btn-sm" style="background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);color:#00d2ff;border-radius:9px;">
+            View All <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-3 mb-5">
+        {% for cat in store_categories %}
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category={{ cat.name|slugify }}" class="cat-item">
+                {% if cat.icon %}
+                <div class="cat-icon d-flex align-items-center justify-content-center mx-auto"
+                    style="width:52px;height:52px;border-radius:50%;background:{{ cat.slug|category_color }}1a;">
+                    <img src="{{ cat.icon.url }}" alt="{{ cat.name }}" style="width:28px;height:28px;object-fit:contain;">
+                </div>
+                {% else %}
+                <div class="cat-icon d-flex align-items-center justify-content-center mx-auto"
+                    style="width:52px;height:52px;border-radius:50%;background:{{ cat.slug|category_color }}1a;">
+                    <i class="bi {{ cat.slug|category_icon }}" style="font-size:1.4rem;color:{{ cat.slug|category_color }};"></i>
+                </div>
+                {% endif %}
+                <span class="fw-semibold" style="font-size:0.85rem;color:var(--lk-body-fg);">{{ cat.name }}</span>
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category=shops" class="cat-item">
+                <i class="bi bi-shop cat-icon text-danger"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">Shops</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category=restaurants" class="cat-item">
+                <i class="bi bi-egg-fried cat-icon text-warning"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">Restaurants</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category=services" class="cat-item">
+                <i class="bi bi-tools cat-icon" style="color:#00d2ff;"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">Services</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category=hospitals" class="cat-item">
+                <i class="bi bi-plus-circle cat-icon text-danger"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">Hospitals</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="{% url 'stores:store_list' %}?category=education" class="cat-item">
+                <i class="bi bi-book cat-icon text-info"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">Education</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-2">
+            <a href="{% url 'explore' %}" class="cat-item">
+                <i class="bi bi-grid cat-icon" style="color:#94a3b8;"></i>
+                <span class="fw-semibold" style="font-size:0.88rem;">More</span>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ===== NEARBY LISTINGS ===== -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="text-uppercase fw-bold mb-1" style="font-size:0.72rem;letter-spacing:0.1em;color:#00d2ff;">Around You</p>
+            <h2 class="fw-bold mb-0 section-heading">Nearby Listings</h2>
+        </div>
+        <a href="{% url 'stores:store_list' %}" class="btn btn-sm" style="background:rgba(0,210,255,0.1);border:1px solid rgba(0,210,255,0.2);color:#00d2ff;border-radius:9px;">
+            View All <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {% for store in featured_stores|slice:":8" %}
+        <div class="col-md-3 col-sm-6">
+            <div class="card listing-card card-hover h-100">
+                <a href="{% url 'stores:store_detail' store.slug %}" class="text-decoration-none">
+                    <div class="position-relative overflow-hidden" style="height:185px;">
+                        {% if store.banner %}
+                        <img src="{{ store.banner.url }}" class="listing-img w-100 h-100" alt="{{ store.name }}">
+                        {% elif store.logo %}
+                        <img src="{{ store.logo.url }}" class="listing-img w-100 h-100" alt="{{ store.name }}">
+                        {% else %}
+                        <img src="https://picsum.photos/seed/{{ store.id|add:123 }}/400/300" class="listing-img w-100 h-100" alt="Store">
+                        {% endif %}
+                        <div class="position-absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 50%);top:0;left:0;right:0;bottom:0;"></div>
+                        <span class="listing-badge">
+                            <i class="bi bi-star-fill rating-star"></i> {{ store.rating|floatformat:1|default:"0.0" }}
+                        </span>
+                        {% if store.is_verified %}
+                        <span class="position-absolute" style="top:10px;left:10px;background:rgba(0,210,255,0.2);border:1px solid rgba(0,210,255,0.4);color:#00d2ff;padding:3px 8px;border-radius:6px;font-size:0.7rem;font-weight:700;">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verified
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-3 pb-2">
+                        <h5 class="card-title fw-bold mb-1 text-truncate" style="color:var(--lk-body-fg);font-size:0.95rem;">{{ store.name }}</h5>
+                        <p class="mb-0 small" style="color:var(--lk-muted);">
+                            <i class="bi bi-geo-alt-fill me-1" style="color:#00d2ff;"></i>{{ store.area.name|default:"Local Area" }}
+                        </p>
+                    </div>
+                </a>
+                <div class="card-body p-3 pt-0">
+                    <div class="d-flex gap-2">
+                        <a href="tel:{{ store.phone }}" class="btn btn-call flex-grow-1">
+                            <i class="bi bi-telephone-fill me-1"></i>Call
+                        </a>
+                        <a href="https://www.google.com/maps/search/?api=1&query={{ store.latitude }},{{ store.longitude }}"
+                            target="_blank" class="btn btn-direction flex-grow-1">
+                            <i class="bi bi-cursor-fill me-1"></i>Directions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        {% for i in "1234"|make_list %}
+        <div class="col-md-3 col-sm-6">
+            <div class="card listing-card card-hover">
+                <div class="position-relative overflow-hidden" style="height:185px;">
+                    <img src="https://picsum.photos/seed/{{ forloop.counter }}/400/300" class="listing-img w-100 h-100" alt="Store">
+                    <span class="listing-badge"><i class="bi bi-star-fill rating-star"></i> 4.5</span>
+                </div>
+                <div class="card-body p-3">
+                    <h5 class="fw-bold mb-1" style="color:var(--lk-body-fg);font-size:0.95rem;">Bright Super Market</h5>
+                    <p class="small mb-3" style="color:var(--lk-muted);"><i class="bi bi-geo-alt-fill me-1" style="color:#00d2ff;"></i>Ahmedabad</p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-call flex-grow-1"><i class="bi bi-telephone-fill me-1"></i>Call</button>
+                        <button class="btn btn-direction flex-grow-1"><i class="bi bi-cursor-fill me-1"></i>Directions</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- ===== STATS STRIP ===== -->
+    <div class="row g-3 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="text-center p-4 rounded-3" style="background:rgba(0,210,255,0.06);border:1px solid rgba(0,210,255,0.12);">
+                <div class="mb-1" style="font-size:2rem;color:#00d2ff;font-weight:800;">500+</div>
+                <div class="small" style="color:var(--lk-muted);">Local Businesses</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-center p-4 rounded-3" style="background:rgba(58,123,213,0.06);border:1px solid rgba(58,123,213,0.12);">
+                <div class="mb-1" style="font-size:2rem;color:#3a7bd5;font-weight:800;">10K+</div>
+                <div class="small" style="color:var(--lk-muted);">Happy Customers</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-center p-4 rounded-3" style="background:rgba(56,239,125,0.06);border:1px solid rgba(56,239,125,0.12);">
+                <div class="mb-1" style="font-size:2rem;color:#38ef7d;font-weight:800;">50+</div>
+                <div class="small" style="color:var(--lk-muted);">Cities Covered</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="text-center p-4 rounded-3" style="background:rgba(255,210,0,0.06);border:1px solid rgba(255,210,0,0.12);">
+                <div class="mb-1" style="font-size:2rem;color:#ffd200;font-weight:800;">4.8★</div>
+                <div class="small" style="color:var(--lk-muted);">Average Rating</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== POPULAR SECTION ===== -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="text-uppercase fw-bold mb-1" style="font-size:0.72rem;letter-spacing:0.1em;color:#ffd200;">Top Rated</p>
+            <h2 class="fw-bold mb-0 section-heading">Popular Near You</h2>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {% for store in top_stores|slice:":6" %}
+        <div class="col-md-4 col-sm-6">
+            <a href="{% url 'stores:store_detail' store.slug %}" class="text-decoration-none">
+                <div class="card card-hover h-100">
+                    <div class="position-relative overflow-hidden" style="height:220px;">
+                        {% if store.banner %}
+                        <img src="{{ store.banner.url }}" class="w-100 h-100" style="object-fit:cover;transition:transform 0.35s;" alt="{{ store.name }}">
+                        {% elif store.logo %}
+                        <img src="{{ store.logo.url }}" class="w-100 h-100" style="object-fit:cover;transition:transform 0.35s;" alt="{{ store.name }}">
+                        {% else %}
+                        <img src="https://picsum.photos/seed/{{ store.id|add:456 }}/600/400" class="w-100 h-100" style="object-fit:cover;transition:transform 0.35s;" alt="{{ store.name }}">
+                        {% endif %}
+                        <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);"></div>
+                        <div class="position-absolute bottom-0 start-0 p-3 w-100">
+                            <h5 class="fw-bold mb-1 text-white text-truncate" style="font-size:1rem;">{{ store.name }}</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="color:#ffc107;font-size:0.8rem;">
+                                    {% with rating=store.rating|default:0|floatformat:0 %}
+                                    {% for i in rating|star_range %}<i class="bi bi-star-fill"></i>{% endfor %}
+                                    {% for i in rating|empty_star_range %}<i class="bi bi-star"></i>{% endfor %}
+                                    {% endwith %}
+                                </div>
+                                <span class="small" style="color:rgba(255,255,255,0.6);">{{ store.total_reviews|default:0 }} reviews</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        {% for i in "123"|make_list %}
+        <div class="col-md-4 col-sm-6">
+            <div class="card card-hover">
+                <div class="position-relative overflow-hidden" style="height:220px;">
+                    <img src="https://picsum.photos/seed/pop{{ forloop.counter }}/600/400" class="w-100 h-100" style="object-fit:cover;" alt="">
+                    <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 60%);"></div>
+                    <div class="position-absolute bottom-0 start-0 p-3">
+                        <h5 class="fw-bold mb-1 text-white">Popular Store</h5>
+                        <div style="color:#ffc107;font-size:0.8rem;">
+                            <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% endfor %}
+    </div>
+
+    <!-- ===== CTA BANNER ===== -->
+    <div class="cta-banner">
+        <div>
+            <p class="text-uppercase fw-bold mb-2" style="font-size:0.72rem;letter-spacing:0.1em;color:#00d2ff;">For Business Owners</p>
+            <h2 class="fw-bold mb-2" style="font-size:1.8rem;">Own a business? List it on Local Khoj</h2>
+            <p class="cta-sub mb-0">Reach thousands of customers in your local area today. Free to get started.</p>
+        </div>
+        <div class="d-flex flex-column gap-2 flex-shrink-0">
+            <a href="{% url 'stores:create_store' %}" class="btn btn-warning btn-lg fw-bold px-5">
+                <i class="bi bi-plus-circle me-2"></i>Add Your Business
+            </a>
+            <span class="text-center small cta-note">No credit card required</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Voice Search ──
+(function(){
+    const btn = document.getElementById('voiceBtn');
+    const input = document.getElementById('heroQ');
+    if (!btn || !input) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        btn.title = 'Voice search not supported in this browser';
+        btn.style.opacity = '0.4';
+        btn.style.cursor = 'not-allowed';
+        return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    let listening = false;
+
+    btn.addEventListener('click', function() {
+        if (listening) {
+            recognition.stop();
+            return;
+        }
+        recognition.start();
+    });
+
+    recognition.onstart = function() {
+        listening = true;
+        btn.innerHTML = '<i class="bi bi-mic-fill" style="color:#ff6b8a;"></i>';
+        btn.style.background = 'rgba(255,107,138,0.2)';
+        btn.style.border = '1px solid rgba(255,107,138,0.4)';
+        btn.title = 'Listening... click to stop';
+    };
+
+    recognition.onresult = function(e) {
+        const transcript = e.results[0][0].transcript;
+        input.value = transcript;
+        document.getElementById('heroSearchForm').submit();
+    };
+
+    recognition.onerror = function(e) {
+        let msg = 'Voice search error.';
+        if (e.error === 'not-allowed') msg = 'Microphone access denied. Please allow it in browser settings.';
+        else if (e.error === 'no-speech') msg = 'No speech detected. Try again.';
+        alert(msg);
+    };
+
+    recognition.onend = function() {
+        listening = false;
+        btn.innerHTML = '<i class="bi bi-mic-fill"></i>';
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.style.border = 'none';
+        btn.title = 'Voice search';
+    };
+})();
+
+// ── State / City dropdowns ──
+const stateInput  = document.getElementById('heroState');
+const cityInput   = document.getElementById('heroCity');
+const stateBtnLbl = document.getElementById('stateBtnLabel');
+const cityBtnLbl  = document.getElementById('cityBtnLabel');
+
+document.querySelectorAll('.state-opt').forEach(function(el){
+    el.addEventListener('click', function(e){
+        e.preventDefault();
+        const val  = this.dataset.val;
+        const name = this.dataset.name || 'All States';
+        stateInput.value = val;
+        stateBtnLbl.textContent = name;
+        cityInput.value = '';
+        cityBtnLbl.textContent = 'All Cities';
+        document.querySelectorAll('.city-item').forEach(function(li){
+            li.style.display = (!val || li.dataset.state === val) ? '' : 'none';
+        });
+    });
+});
+
+document.querySelectorAll('.city-opt').forEach(function(el){
+    el.addEventListener('click', function(e){
+        e.preventDefault();
+        cityInput.value = this.dataset.val;
+        cityBtnLbl.textContent = this.dataset.name || 'All Cities';
+    });
+});
+
+document.getElementById('stateSearch').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#stateDropdown .state-opt').forEach(function(a){
+        a.closest('li').style.display = (!q || (a.dataset.name||'').toLowerCase().includes(q)) ? '' : 'none';
+    });
+});
+
+document.getElementById('citySearch').addEventListener('input', function(){
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#cityDropdown .city-opt').forEach(function(a){
+        a.closest('li').style.display = (!q || (a.dataset.name||'').toLowerCase().includes(q)) ? '' : 'none';
+    });
+});
+
+// ── Live Location ──
+document.getElementById('locBtn').addEventListener('click', function(){
+    if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+    const btn = this;
+    document.getElementById('locLabel').textContent = 'Locating...';
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos){
+            document.getElementById('heroLat').value = pos.coords.latitude;
+            document.getElementById('heroLng').value = pos.coords.longitude;
+            document.getElementById('locLabel').textContent = 'Located ✓';
+            btn.style.background = 'rgba(56,239,125,.15)';
+            btn.style.borderColor = 'rgba(56,239,125,.3)';
+            btn.style.color = '#38ef7d';
+            btn.disabled = false;
+            const form = document.getElementById('heroSearchForm');
+            let s = form.querySelector('input[name="sort"]');
+            if (!s) { s = document.createElement('input'); s.type='hidden'; s.name='sort'; form.appendChild(s); }
+            s.value = 'distance';
+            form.submit();
+        },
+        function(){
+            document.getElementById('locLabel').textContent = 'Near Me';
+            btn.disabled = false;
+            alert('Could not get location. Please allow location access.');
+        },
+        { timeout: 8000 }
+    );
+});
+</script>
+<style>
+@keyframes spin { to { transform:rotate(360deg); } }
+.spin { display:inline-block; animation:spin .7s linear infinite; }
+#stateDropdown .dropdown-item:hover,
+#cityDropdown  .dropdown-item:hover { background:rgba(0,210,255,.1)!important; color:#00d2ff!important; }
+</style>
+{% endblock %}

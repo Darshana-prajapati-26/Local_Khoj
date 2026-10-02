@@ -2,7 +2,9 @@
 # Render build script for Local Khoj
 set -o errexit   # exit on any error
 
-pip install --upgrade pip
+# Upgrade pip and install build tools first
+pip install --upgrade pip wheel setuptools
+
 pip install -r requirements.txt
 
 python manage.py collectstatic --noinput
